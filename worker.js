@@ -1,0 +1,66 @@
+export default{fetch(r,e){const u=new URL(r.url),c=(u.searchParams.get('room')||'').toUpperCase();if(!c)return new Response('Wolfsmond läuft');return e.ROOM.get(e.ROOM.idFromName(c)).fetch(r)}};
+export class Room{
+constructor(){this.phase='lobby';this.step=null;this.P=new Map();this.host=null;this.unanimous=true;this.announce=[];this.win=null;this.votes=new Map();this.reset()}
+reset(){this.pot={heal:true,poison:true};this.nightReset()}
+nightReset(){this.wp=new Map();this.wok=new Set();this.victim=null;this.healed=false;this.poisoned=null;this.seen=null}
+get A(){return[...this.P.values()].filter(x=>x.alive)}
+get W(){return this.A.filter(x=>x.role==='werwolf')}
+same(){const w=this.W;return w.length>0&&w.every(x=>this.wp.has(x.id))&&new Set(w.map(x=>this.wp.get(x.id))).size===1}
+async fetch(r){const u=new URL(r.url),id=u.searchParams.get('id'),[c,ws]=Object.values(new WebSocketPair());ws.accept();
+let p=this.P.get(id);
+if(!p){if(this.phase!=='lobby'||!id){ws.send('{"err":"Das Spiel läuft bereits."}');ws.close();return new Response(null,{status:101,webSocket:c})}
+p={id,name:(u.searchParams.get('name')||'Spieler').slice(0,14),alive:true,role:null};this.P.set(id,p);this.host??=id}
+p.ws=ws;
+ws.addEventListener('message',e=>{try{this.msg(p,JSON.parse(e.data))}catch{}});
+ws.addEventListener('close',()=>{if(p.ws!==ws)return;p.ws=null;if(this.phase==='lobby'){this.P.delete(id);if(this.host===id)this.host=this.P.keys().next().value??null}this.push()});
+this.push();return new Response(null,{status:101,webSocket:c})}
+msg(p,m){const t=m.t,h=p.id===this.host;
+if(t==='cfg'&&h&&this.phase==='lobby')this.unanimous=!!m.u;
+else if(t==='start'&&h&&this.phase==='lobby'&&this.P.size>=4)this.start();
+else if(t==='go'&&h&&(this.phase==='roles'||this.step==='out'))this.night();
+else if(t==='again'&&h&&this.phase==='over'){this.phase='lobby';this.step=null;this.win=null;this.announce=[];for(const x of this.P.values()){x.alive=true;x.role=null}this.reset()}
+else if(this.phase==='night'&&p.alive)this.nightMsg(p,m);
+else if(this.phase==='day'&&this.step==='talk'&&h&&t==='vs'){this.step='vote';this.votes=new Map()}
+else if(this.phase==='day'&&this.step==='vote'){if(t==='vote'&&p.alive&&this.P.get(m.id)?.alive)this.votes.set(p.id,m.id);if((h&&t==='tally')||this.votes.size>=this.A.length)this.tally()}
+this.push()}
+nightMsg(p,m){const t=m.t,s=this.step;
+if(s==='wolves'&&p.role==='werwolf'){
+if(t==='pick'&&this.P.get(m.id)?.alive&&this.P.get(m.id).role!=='werwolf'){this.wp.set(p.id,m.id);this.wok.clear()}
+if(t==='ok'&&(this.unanimous?this.same():this.wp.has(p.id)))this.wok.add(p.id);
+if(this.W.every(x=>this.wok.has(x.id)))this.wolvesDone()}
+else if(s==='seer'&&p.role==='seherin'){
+if(t==='see'&&!this.seen&&this.P.get(m.id)?.alive)this.seen={id:m.id,w:this.P.get(m.id).role==='werwolf'};
+if(t==='next'&&this.seen)this.next('seer')}
+else if(s==='witch'&&p.role==='hexe'&&t==='witch'){
+if(m.heal&&this.pot.heal&&this.victim){this.healed=true;this.pot.heal=false}
+if(m.poison&&this.pot.poison&&this.P.get(m.poison)?.alive){this.poisoned=m.poison;this.pot.poison=false}
+this.next('witch')}}
+wolvesDone(){const c={};for(const v of this.wp.values())c[v]=(c[v]||0)+1;const e=Object.entries(c).sort((a,b)=>b[1]-a[1]);
+this.victim=e.length&&(e.length===1||e[0][1]>e[1][1])?e[0][0]:null;this.next('wolves')}
+next(s){if(this.step!==s)return;this.go({wolves:'seer',seer:'witch',witch:'dawn'}[s])}
+go(s){this.step=s;if(s==='dawn')return this.dawn();
+const r={wolves:'werwolf',seer:'seherin',witch:'hexe'}[s];
+const act=this.A.some(x=>x.role===r)&&(s!=='witch'||this.pot.heal||this.pot.poison);
+if(!act)setTimeout(()=>{this.next(s);this.push()},4000+Math.random()*4000)}
+dawn(){const d=new Set();if(this.victim&&!this.healed)d.add(this.victim);if(this.poisoned)d.add(this.poisoned);
+d.forEach(i=>this.P.get(i).alive=false);this.announce=[...d];this.phase='day';this.step='talk';this.check()}
+check(){const w=this.W.length,o=this.A.length-w;if(!w)this.fin('dorf');else if(w>=o)this.fin('wolf')}
+fin(x){this.win=x;this.phase='over';this.step=null}
+night(){this.phase='night';this.nightReset();this.announce=[];this.go('wolves')}
+tally(){const c={};for(const v of this.votes.values())c[v]=(c[v]||0)+1;const e=Object.entries(c).sort((a,b)=>b[1]-a[1]);
+const o=e.length&&(e.length===1||e[0][1]>e[1][1])?e[0][0]:null;
+if(o)this.P.get(o).alive=false;this.announce=o?[o]:[];this.step='out';this.check()}
+start(){const ids=[...this.P.keys()].sort(()=>Math.random()-.5),n=ids.length,r=Array(Math.max(1,n>>2)).fill('werwolf');
+if(n>=5)r.push('seherin');if(n>=6)r.push('hexe');while(r.length<n)r.push('dorfbewohner');
+ids.forEach((id,i)=>this.P.get(id).role=r[i]);this.phase='roles'}
+push(){for(const p of this.P.values()){try{p.ws?.send(JSON.stringify(this.view(p)))}catch{}}}
+view(p){const L=[...this.P.values()],s=this.step,v={phase:this.phase,step:s,host:this.host,u:this.unanimous,win:this.win,announce:this.announce,
+me:{id:p.id,name:p.name,role:p.role,alive:p.alive},
+players:L.map(x=>({id:x.id,name:x.name,alive:x.alive,on:!!x.ws,role:(!x.alive||this.phase==='over')?x.role:undefined}))};
+if(p.role==='werwolf'&&this.phase!=='lobby')v.mates=L.filter(x=>x.role==='werwolf').map(x=>x.id);
+if(this.phase==='night'&&p.alive){
+if(s==='wolves'&&p.role==='werwolf'){const c={};for(const t of this.wp.values())c[t]=(c[t]||0)+1;Object.assign(v,{picks:c,mine:this.wp.get(p.id),ok:this.wok.has(p.id),can:this.unanimous?this.same():this.wp.has(p.id)})}
+if(s==='seer'&&p.role==='seherin')v.seen=this.seen;
+if(s==='witch'&&p.role==='hexe')Object.assign(v,{victim:this.victim,pot:this.pot})}
+if(this.phase==='day'&&s==='vote')Object.assign(v,{voted:this.votes.has(p.id),n:this.votes.size});
+return v}}
