@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Wolfsmond</title>
+<meta name="apple-mobile-web-app-title" content="Wolfsmond">
+<link rel="icon" href="images/favicon.png"><link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d17;--fg:#e8e6f0;--ac:#e0a458;--rd:#b3202a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg) center/cover fixed;color:var(--fg);font:16px/1.4 system-ui,sans-serif;text-align:center}
+body.n{background-image:linear-gradient(#0b0d17cc,#0b0d17cc),url(images/hintergrund-nacht.png)}
+body.d{background-image:linear-gradient(#0b0d1799,#0b0d1799),url(images/hintergrund-tag.png)}
+main{max-width:460px;margin:auto;padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+h1,h2{font-family:'Pirata One',Georgia,serif;font-weight:400;color:var(--ac);margin:.4em 0}
+h1{font-size:3em}h2{font-size:1.8em}
+button,input{font:inherit;padding:13px;border-radius:10px;border:1px solid #ffffff33;background:#1b1f33;color:var(--fg);width:100%;margin:5px 0}
+button.p{background:var(--ac);color:#15110a;border:0;font-weight:700}
+button:disabled{opacity:.4}
+.l button.s{outline:2px solid var(--ac)}
+.dead{opacity:.5;text-decoration:line-through}
+img.c{width:68%;border-radius:12px}
+.code{font:700 2.4em ui-monospace,monospace;letter-spacing:.2em;color:var(--ac)}
+small{opacity:.7}
+.logo{display:block;width:72%;max-width:300px;margin:10px auto;border-radius:14px}
+</style></head><body><main id="a"></main><script>
+const WS='wss://wolfsmond.spam-lama.workers.dev';
+const R={werwolf:['Werwolf','🐺'],dorfbewohner:['Dorfbewohner','🧑‍🌾'],seherin:['Seherin','🔮'],hexe:['Hexe','🧪']};
+const E=r=>R[r]?R[r][1]:r==='tod'?'🪦':'🌙',$=document.getElementById('a'),U=new URLSearchParams(location.search),Q=U.get('p')||'',K=k=>'wm_'+k+Q,id=localStorage[K('id')]||(localStorage[K('id')]=crypto.randomUUID());
+let ws,v,rt,hiddenAt=0,show=0,hx=0,px=null,vsel=null,ssel=null,room=(U.get('r')||'').toUpperCase()||localStorage[K('room')],name=localStorage[K('name')]||(Q?'Test'+Q:'');
+const send=o=>ws.send(JSON.stringify(o)),nm=i=>v.players.find(p=>p.id===i)?.name||'?',
+img=r=>`<img class="c" src="images/${r}.png" alt="" onerror="this.outerHTML='<div style=font-size:80px>${E(r)}</div>'">`;
+const go=()=>send({t:'go'}),vs=()=>send({t:'vs'}),tally=()=>send({t:'tally'}),again=()=>send({t:'again'}),ok=()=>send({t:'ok'}),nx=()=>send({t:'next'}),
+pick=i=>send({t:'pick',id:i}),see=()=>ssel&&send({t:'see',id:ssel}),vote=()=>vsel&&send({t:'vote',id:vsel}),ps=i=>{ssel=ssel===i?null:i;render()},pv=i=>{vsel=vsel===i?null:i;render()},pois=i=>{px=px===i?null:i;render()},witch=()=>send({t:'witch',heal:!!hx,poison:px});
+function join(c){room=c||document.getElementById('rc').value.toUpperCase().trim();name=document.getElementById('nn').value.trim()||'Spieler';if(!room)return;localStorage[K('room')]=room;localStorage[K('name')]=name;connect()}
+function connect(){clearTimeout(rt);const old=ws;ws=new WebSocket(`${WS}/ws?room=${room}&id=${id}&name=${encodeURIComponent(name||'Spieler')}`);
+ws.onopen=()=>{if(old&&old!==ws){old.onclose=null;old.onmessage=null;try{old.close()}catch(e){}}};
+ws.onmessage=e=>{const d=JSON.parse(e.data);if(d.err){alert(d.err);localStorage.removeItem(K('room'));location.href=location.pathname+(Q?'?p='+Q:'');return}
+if(!v||v.phase!==d.phase||v.step!==d.step){hx=0;px=null;show=0;vsel=null;ssel=null}v=d;render()};
+ws.onclose=()=>{rt=setTimeout(connect,2000)}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(room&&(!ws||ws.readyState!==1||Date.now()-hiddenAt>5000))connect()});
+const list=(f,sel,cnt,fn)=>`<div class=l>${v.players.filter(f).map(p=>{const c=cnt?.[p.id]||0;return`<button class="${sel===p.id?'s':''}" style="${c?`background:rgba(179,32,42,${Math.min(.2+.3*c,.95)})`:''}" onclick="${fn}('${p.id}')">${p.name}${c?' · '+c:''}</button>`}).join('')}</div>`;
+function render(){
+document.body.className=v?(v.phase==='night'?'n':v.phase==='day'?'d':''):'';
+let h='';
+if(!room)h=`<img class=logo src="images/logo.png" alt="Wolfsmond" onerror="this.outerHTML='<h1>Wolfsmond</h1>'"><input id=nn placeholder="Dein Name" value="${name||''}"><button class=p onclick="join(Math.random().toString(36).slice(2,6).toUpperCase())">Neues Spiel</button><input id=rc placeholder="Raumcode" maxlength=4><button onclick="join()">Beitreten</button>`;
+else if(!v)h='<h2>Verbinde …</h2>';
+else{const me=v.me,host=v.host===me.id,ph=v.phase,s=v.step,P=v.players,a=v.announce,rn=i=>R[P.find(p=>p.id===i).role][0];
+if(ph==='lobby')h=`<img class=logo src="images/logo.png" alt="Wolfsmond" onerror="this.outerHTML='<h1>Wolfsmond</h1>'"><small>Raumcode</small><div class=code>${room}</div><p>${P.length} Spieler (mindestens 4)</p>${P.map(p=>`<div>${p.name}</div>`).join('')}`+(host?`<p><label><input type=checkbox style="width:auto" ${v.u?'checked':''} onchange="send({t:'cfg',u:this.checked})"> Werwölfe müssen einstimmig sein</label></p><button class=p ${P.length<4?'disabled':''} onclick="send({t:'start'})">Spiel starten</button>`:'<p>Der Host startet gleich das Spiel.</p>');
+else if(ph==='roles'){const r=me.role;h=`<h2>Deine Rolle</h2><div onclick="show=!show;render()">${img(show?r:'kartenrueckseite')}</div><h2>${show?R[r][0]:'Antippen zum Aufdecken'}</h2>`+(show&&v.mates?`<p>Werwölfe: ${v.mates.map(nm).join(', ')}</p>`:'')+(host?'<button class=p onclick="go()">Nacht beginnen</button>':'')}
+else if(ph==='night'){
+if(!me.alive)h=`<h2>Du bist ausgeschieden</h2>${img('tod')}`;
+else if(s==='wolves'&&me.role==='werwolf')h=`<h2>Wen fresst ihr?</h2>`+list(p=>p.alive&&!v.mates.includes(p.id),v.mine,v.picks,'pick')+`<button class=p ${v.can&&!v.ok?'':'disabled'} onclick="ok()">${v.ok?'Warte auf die anderen …':'Bestätigen'}</button><small>${v.u?'Alle müssen denselben Namen wählen.':'Die Mehrheit entscheidet.'}</small>`;
+else if(s==='seer'&&me.role==='seherin')h=!v.seen?`<h2>Wen willst du sehen?</h2>`+list(p=>p.alive&&p.id!==me.id,ssel,0,'ps')+`<button class=p ${ssel?'':'disabled'} onclick="see()">Ansehen</button>`:`<h2>${nm(v.seen.id)}</h2>${img(v.seen.w?'werwolf':'dorfbewohner')}<p>${v.seen.w?'ist ein Werwolf!':'ist kein Werwolf.'}</p><button class=p onclick="nx()">Weiter</button>`;
+else if(s==='witch'&&me.role==='hexe')h=`<h2>Hexe</h2><p>${v.victim?'Opfer: '+nm(v.victim):'Niemand wurde angegriffen.'}</p>`+(v.pot.heal&&v.victim?`<button class="${hx?'p':''}" onclick="hx=!hx;render()">Heiltrank einsetzen</button>`:'')+(v.pot.poison?`<p>Gifttrank an:</p>`+list(p=>p.alive&&p.id!==me.id,px,0,'pois'):'')+`<button class=p onclick="witch()">Fertig</button>`;
+else h=`<h2>Das Dorf schläft …</h2><div style="font-size:90px">🌙</div>`}
+else if(ph==='day'){h=(me.alive?'':'<div style="width:38%;margin:0 auto">'+img('tod')+'<p><b>Du bist ausgeschieden</b></p></div>')+`<h2>Der Morgen graut</h2>`+(s==='talk'?`<p>${a.length?'In der Nacht starb: '+a.map(i=>nm(i)+' ('+rn(i)+')').join(', '):'Niemand ist gestorben.'}</p><p>Diskutiert!</p>`+(host?'<button class=p onclick="vs()">Abstimmung starten</button>':''):
+s==='vote'?`<h2>Wer soll gehen?</h2>`+(me.alive&&!v.voted?list(p=>p.alive&&p.id!==me.id,vsel,0,'pv')+`<button class=p ${vsel?'':'disabled'} onclick="vote()">Abstimmen</button>`:`<p>${me.alive?'Deine Stimme ist abgegeben. ':''}${v.n} von ${v.total} Stimmen sind da.</p>`)+(host?'<button onclick="tally()">Jetzt auszählen</button>':''):
+`<p>${a.length?nm(a[0])+' wurde verbannt ('+rn(a[0])+').':'Gleichstand: Niemand wird verbannt.'}</p>`+(host?'<button class=p onclick="go()">Nacht beginnen</button>':''))}
+else h=`<h2>${v.win==='dorf'?'Das Dorf gewinnt!':'Die Werwölfe gewinnen!'}</h2>${img(v.win==='dorf'?'dorfbewohner':'werwolf')}`+P.map(p=>`<div class="${p.alive?'':'dead'}">${p.name}: ${R[p.role][0]}</div>`).join('')+(host?'<button class=p onclick="again()">Neues Spiel</button>':'')}
+$.innerHTML=h+(room?'<p><small><a href="#" style="color:inherit" onclick="leave();return false">Spiel verlassen</a></small></p>':'')}
+function leave(){if(!confirm('Spiel wirklich verlassen?'))return;localStorage.removeItem(K('room'));location.href=location.pathname+(Q?'?p='+Q:'')}
+if(room)connect();else render();
+</script></body></html>
