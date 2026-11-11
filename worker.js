@@ -2,7 +2,7 @@ export default{fetch(r,e){const u=new URL(r.url),c=(u.searchParams.get('room')||
 const ROLE={thief:'dieb',amor:'amor',prot:'heiler',seer:'seherin',wolves:'werwolf',heal:'hexe',poison:'hexe',raven:'rabe'},
 NEXT={thief:'amor',amor:'lovers',lovers:'prot',prot:'seer',seer:'wolves',wolves:'heal',heal:'poison',poison:'raven',raven:'end'},
 CUE={thief:['dieb-erwacht','dieb-schlaeft'],amor:['amor-erwacht','amor-schlaeft'],lovers:['verliebte-erwachen','verliebte-schlafen'],prot:['heiler-erwacht','heiler-schlaeft'],seer:['seherin-erwacht','seherin-schlaeft'],wolves:['werwoelfe-erwachen','werwoelfe-schlafen'],heal:['hexe-erwacht','hexe-schlaeft'],raven:['rabe-erwacht','rabe-schlaeft']},
-KEYS=['phase','step','host','cfg','win','pot','victim','healed','poisoned','seen','nx','captain','lovers','nn','protect','lastProt','dead','kind','pend','cont','aw','actor','retry','sn','capNew','cands','rnd','lot','capHow','res','spare','thiefDone','thiefId','capNone','tEnd','fool','foolCap','bitId','desp','vset','bockId','curseId','dieb','hr','appId','appFrom','markId','log','tf','evDrawn'];
+KEYS=['phase','step','host','cfg','win','pot','victim','healed','poisoned','seen','nx','captain','lovers','nn','protect','lastProt','dead','kind','pend','cont','aw','actor','retry','sn','capNew','cands','rnd','lot','capHow','res','spare','thiefDone','thiefId','capNone','tEnd','fool','foolCap','bitId','desp','vset','bockId','curseId','dieb','hr','appId','appFrom','markId','log','tf','evDrawn','ef','rd','noCap','tieN','tieSure'];
 const RL={werwolf:1,seherin:1,hexe:1,jaeger:1,amor:1,heiler:1,maedchen:1,dieb:1,wolfshund:1,dorfdepp:1,alter:1,suendenbock:1,verfluchter:1,schwestern:1,lehrling:1,verdaechtiger:1,rabe:1};
 function suggest(n){return{werwolf:n<6?1:n<9?2:n<13?3:4,seherin:n>=5?1:0,hexe:n>=6?1:0,jaeger:n>=6?1:0,amor:n>=7?1:0,heiler:0,maedchen:n>=11?1:0,dieb:n>=12?1:0}}
 const EV=[
@@ -45,14 +45,14 @@ function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(crypto.getRand
 export class Room{
 constructor(st,env){this.st=st.storage;this.env=env;this.locked=false;this.phase='lobby';this.step=null;this.P=new Map();this.host=null;this.cfg=defCfg();this.win=null;this.votes=new Map();this.cueN=0;this.cue=null;this.cb=null;this.pz=2500;this.reset();
 st.blockConcurrencyWhile(async()=>{const d=await this.st.get('s');if(d)this.load(d)})}
-reset(){this.tf=null;this.evDrawn=[];this.pot={heal:true,poison:true};this.captain=null;this.lovers=null;this.nn=0;this.lastProt=null;this.dead=[];this.kind=null;this.pend=[];this.cont=null;this.aw=null;this.actor=null;this.retry=0;this.nx=null;this.sn=false;this.capNew=null;this.cands=null;this.rnd=1;this.lot=false;this.capHow=null;this.res=null;this.spare=[];this.capNone=false;this.tEnd=0;this.seenR=new Set();this.readyAt=0;this.vset=null;this.bockId=null;this.log=[];this.nightReset()}
+reset(){this.tf=null;this.evDrawn=[];this.ef=null;this.rd=null;this.noCap=null;this.tieN=1;this.tieSure=[];this.pot={heal:true,poison:true};this.captain=null;this.lovers=null;this.nn=0;this.lastProt=null;this.dead=[];this.kind=null;this.pend=[];this.cont=null;this.aw=null;this.actor=null;this.retry=0;this.nx=null;this.sn=false;this.capNew=null;this.cands=null;this.rnd=1;this.lot=false;this.capHow=null;this.res=null;this.spare=[];this.capNone=false;this.tEnd=0;this.seenR=new Set();this.readyAt=0;this.vset=null;this.bockId=null;this.log=[];this.nightReset()}
 nightReset(){this.markId=null;this.bitId=null;this.curseId=null;this.desp=false;this.fool=null;this.foolCap=false;this.wp=new Map();this.wok=new Set();this.victim=null;this.healed=false;this.poisoned=null;this.seen=null;this.protect=null;this.lk=new Set();this.thiefDone=false;this.thiefId=null}
 save(){try{this.st.put('s',this.dump())}catch{}}
 dump(){const o={};KEYS.forEach(k=>o[k]=this[k]);o.P=[...this.P.values()].map(({id,name,role,alive,fool,bites,orig})=>({id,name,role,alive,fool,bites,orig}));o.wp=[...this.wp];o.wok=[...this.wok];o.votes=[...this.votes];o.lk=[...this.lk];return o}
 load(d){KEYS.forEach(k=>{if(d[k]!==undefined)this[k]=d[k]});this.P=new Map(d.P.map(p=>[p.id,p]));this.wp=new Map(d.wp);this.wok=new Set(d.wok);this.votes=new Map(d.votes);this.lk=new Set(d.lk||[]);
 if(this.phase==='lobby'){this.P.clear();this.host=null}else if(this.phase==='night')this.go(this.step==='wait'||!this.step?(this.nx||'thief'):this.step)}
 get A(){return[...this.P.values()].filter(x=>x.alive)}
-get V(){const a=this.A.filter(x=>!x.fool),b=this.vset?a.filter(x=>this.vset.includes(x.id)):a;return b.length?b:a}
+get V(){const e=this.ef,a=this.A.filter(x=>!x.fool&&!(e&&e.id==='verbannt'&&e.a===x.id&&this.step==='vote')),b=this.vset?a.filter(x=>this.vset.includes(x.id)):a;return b.length?b:a}
 get W(){return this.A.filter(x=>x.role==='werwolf')}
 same(){const w=this.W;return w.length>0&&w.every(x=>this.wp.has(x.id))&&new Set(w.map(x=>this.wp.get(x.id))).size===1}
 async fetch(r){const u=new URL(r.url),id=u.searchParams.get('id'),[c,ws]=Object.values(new WebSocketPair());ws.accept();
@@ -82,18 +82,18 @@ else if(t==='seen'&&ph==='roles'){if(!(p.id===this.dieb&&!this.thiefDone)){this.
 else if(t==='thief'&&ph==='roles'&&p.id===this.dieb&&!this.thiefDone)this.thiefPick(p,m.i)
 else if(t==='dog'&&ph==='roles'&&p.role==='wolfshund'&&(m.r==='werwolf'||m.r==='dorfbewohner')){p.role=m.r;this.chk()}
 else if(t==='more'&&h&&s==='talk'&&this.tEnd)this.tEnd=Math.max(this.tEnd,Date.now())+120000;
-else if((t==='go'&&h&&((ph==='roles'&&this.ready())||s==='out'||s==='cap'))||(t==='gof'&&h&&ph==='roles')){if(ph==='roles'){this.thiefAuto();this.dogAuto()}if(ph==='roles'&&this.cfg.cap&&this.cfg.capWhen==='start'){this.phase='day';this.step='wahl';this.aw='night';this.dead=[];this.sn=false;this.capNew=null;this.initW()}else this.night()}
+else if((t==='go'&&h&&((ph==='roles'&&this.ready())||s==='out'||s==='cap'||(s==='talk'&&this.ef&&this.ef.id==='gewitter')))||(t==='gof'&&h&&ph==='roles')){if(ph==='roles'){this.thiefAuto();this.dogAuto()}if(ph==='roles'&&this.cfg.cap&&this.cfg.capWhen==='start'){this.phase='day';this.step='wahl';this.aw='night';this.dead=[];this.sn=false;this.capNew=null;this.initW()}else this.night()}
 else if(((t==='again'&&ph==='over')||(t==='reset'&&ph!=='lobby'))&&h){this.phase='lobby';this.step=null;this.win=null;this.locked=false;this.votes=new Map();for(const x of this.P.values()){x.alive=true;x.role=null}this.reset()}
 else if(ph==='night'&&p.alive)this.nightMsg(p,m);
 else if(ph==='day')this.dayMsg(p,m,h);
 this.push()}
 dayMsg(p,m,h){const t=m.t,s=this.step;
-if(h&&t==='skip'&&s==='tie'&&this.cands){const a=this.cands;this.cands=null;this.actor=null;this.vdie(a[Math.floor(Math.random()*a.length)]);this.settle()}
+if(h&&t==='skip'&&s==='tie'&&this.cands){const a=[...this.cands],n=this.tieN||1,pick=[];while(pick.length<n&&a.length)pick.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);const sure=this.tieSure||[];this.cands=null;this.actor=null;this.tieN=1;this.tieSure=[];this.rd=null;[...sure,...pick].forEach(i=>this.vdie(i));this.settle()}
 else if(h&&t==='skip'&&(s==='jaeger'||s==='nachf'||s==='bock')){this.pend.shift();if(s==='nachf'&&this.A.length){const a=this.A;this.captain=a[Math.floor(Math.random()*a.length)].id;this.capNew=this.captain;this.capHow='nachf'}this.settle()}
-else if(s==='talk'&&h&&t==='vs'){this.step='vote';this.votes=new Map()}
-else if(s==='vote'||s==='wahl'){if(t==='vote'&&p.alive&&this.V.some(x=>x.id===p.id)&&!this.votes.has(p.id)&&this.P.get(m.id)?.alive&&(s==='wahl'?((!this.cands||this.cands.includes(m.id))&&(this.cfg.selfW||m.id!==p.id)):m.id!==p.id&&!this.P.get(m.id).fool))this.votes.set(p.id,m.id);
+else if(s==='talk'&&h&&t==='vs'&&!(this.ef&&this.ef.id==='gewitter')){const e=this.ef||{};this.step='vote';this.votes=new Map();this.cands=null;this.rd={m:e.id==='stichwahl'?'s':e.id==='fackelzug'?'f':null,r:1};if(e.id==='machtwort'&&this.cfg.cap&&this.captain){const q=this.P.get(this.captain);if(q&&q.alive&&!q.fool)this.vset=[this.captain]}}
+else if(s==='vote'||s==='wahl'){if(t==='vote'&&p.alive&&this.V.some(x=>x.id===p.id)&&!this.votes.has(p.id)&&this.P.get(m.id)?.alive&&(s==='wahl'?((!this.cands||this.cands.includes(m.id))&&m.id!==this.noCap&&(this.cfg.selfW||m.id!==p.id)):m.id!==p.id&&!this.P.get(m.id).fool&&(!this.cands||this.cands.includes(m.id))&&!(this.ef&&this.ef.id==='gnade'&&this.ef.a===m.id)))this.votes.set(p.id,m.id);
 if((h&&t==='tally'&&s==='vote')||(h&&t==='tallyw'&&s==='wahl')||this.votes.size>=this.V.length)s==='vote'?this.tally():this.tallyW()}
-else if(s==='tie'&&p.id===this.actor&&t==='tie'&&this.cands?.includes(m.id)){this.cands=null;this.actor=null;this.vdie(m.id);this.settle()}
+else if(s==='tie'&&p.id===this.actor&&t==='tie'){const ids=(Array.isArray(m.ids)?m.ids:[m.id]).filter((x,i,a)=>this.cands?.includes(x)&&a.indexOf(x)===i);if(ids.length===(this.tieN||1)){const sure=this.tieSure||[];this.cands=null;this.actor=null;this.tieN=1;this.tieSure=[];this.rd=null;[...sure,...ids].forEach(i=>this.vdie(i));this.settle()}}
 else if(s==='jaeger'&&p.id===this.actor&&t==='shoot'&&(m.id===null||this.P.get(m.id)?.alive)){this.pend.shift();if(m.id!==null)this.die(m.id,'jaeger');this.settle()}
 else if(s==='nachf'&&p.id===this.actor&&t==='nachf'&&this.P.get(m.id)?.alive){this.pend.shift();this.captain=m.id;this.capNew=m.id;this.capHow='nachf';this.settle()}
 else if(s==='bock'&&p.id===this.actor&&t==='bock'&&Array.isArray(m.ids)){const ids=m.ids.filter(i=>this.P.get(i)?.alive&&!this.P.get(i).fool);if(ids.length){this.pend.shift();this.vset=[...new Set(ids)];this.settle()}}}
@@ -131,28 +131,47 @@ if(p.role==='jaeger')this.pend.push({t:'jaeger',id});
 if(this.captain===id)this.pend.push({t:'nachf',id});this.pend.sort((a,b)=>(a.t==='jaeger'?0:1)-(b.t==='jaeger'?0:1));if(p.role==='alter'&&['vote','jaeger','gift'].includes(how))this.despair()}
 dawn(){this.dead=[];this.bockId=null;this.desp=false;this.bitId=null;this.curseId=null;this.kind='n';this.sn=false;this.capNew=null;this.lot=false;if(this.victim&&(this.healed||this.protect===this.victim))this.L({e:'saved',id:this.victim,by:this.healed?'hexe':'heiler',d:0});if(this.victim&&!this.healed&&this.protect!==this.victim){const q=this.P.get(this.victim);if(q&&q.role==='alter'&&!(q.bites>0)){q.bites=1;this.bitId=q.id;this.L({e:'bite',id:q.id,d:0})}else if(q&&q.role==='verfluchter'&&this.poisoned!==this.victim){q.orig='verfluchter';q.role='werwolf';this.curseId=q.id;this.L({e:'curse',id:q.id,d:0})}else this.die(this.victim,'wolf')}if(this.poisoned)this.die(this.poisoned,'gift');
 this.lastProt=this.protect||null;this.phase='day';this.cont=(this.cfg.cap&&!this.captain&&this.cfg.capWhen==='n1'&&this.nn===1)?'wahl':'talk';this.evMorning();this.settle()}
-tally(){this.vset=null;this.bockId=null;this.desp=false;this.fool=null;this.foolCap=false;const c={};for(const[a,b]of this.votes)c[b]=(c[b]||0)+(a===this.captain?2:1);if(this.markId&&this.P.get(this.markId)?.alive)c[this.markId]=(c[this.markId]||0)+1;this.markId=null;this.res={k:'v',r:Object.entries(c).sort((a,b)=>b[1]-a[1])};const mx=Math.max(0,...Object.values(c)),top=Object.keys(c).filter(k=>c[k]===mx);
+tally(){const e=this.ef||{},rd=this.rd||{m:null,r:1},r1=rd.r===1;this.vset=null;this.bockId=null;this.desp=false;this.fool=null;this.foolCap=false;this.cands=null;const c={};for(const[a,b]of this.votes)c[b]=(c[b]||0)+(a===this.captain?(e.id==='schwach'?1:2):1);
+if(r1){if(this.markId&&this.P.get(this.markId)?.alive)c[this.markId]=(c[this.markId]||0)+1;if(e.id==='rufmord'&&this.P.get(e.a)?.alive)c[e.a]=(c[e.a]||0)+1}
+this.markId=null;this.res={k:'v',r:Object.entries(c).sort((a,b)=>b[1]-a[1])};const mx=Math.max(0,...Object.values(c)),top=Object.keys(c).filter(k=>c[k]===mx);
 this.dead=[];this.kind='v';this.sn=false;this.capNew=null;this.lot=false;this.cont='out';
-const bk=top.length>1&&this.A.find(x=>x.role==='suendenbock');if(bk){this.bockId=bk.id;this.die(bk.id,'bock');this.settle();return}
-if(top.length>1&&this.cfg.cap&&this.captain&&this.P.get(this.captain)?.alive){this.cands=top;this.step='tie';this.actor=this.captain;return}
-if(top.length===1)this.vdie(top[0]);this.settle()}
+if(rd.m){const gr=[];for(const[id,n]of this.res.r){if(n<=0)continue;const g=gr.find(x=>x.n===n);if(g)g.ids.push(id);else gr.push({n,ids:[id]})}return rd.m==='s'?this.tallyS(gr,rd):this.tallyF(gr,rd)}
+const bk=top.length>1&&this.A.find(x=>x.role==='suendenbock');if(bk){this.bockId=bk.id;this.die(bk.id,'bock');this.rd=null;this.settle();return}
+if(top.length>1&&this.cfg.cap&&this.captain&&this.P.get(this.captain)?.alive){this.cands=top;this.tieN=1;this.tieSure=[];this.step='tie';this.actor=this.captain;this.rd=null;return}
+this.rd=null;if(top.length===1)this.vdie(top[0]);this.settle()}
+runoff(m,r,c,x){this.rd={m,r,...x};this.cands=c;this.votes=new Map();this.step='vote';this.vset=null}
+finalTie(pool,n,sure){const bk=this.A.find(x=>x.role==='suendenbock');this.rd=null;
+if(bk){this.bockId=bk.id;sure.forEach(i=>this.vdie(i));this.die(bk.id,'bock');return this.settle()}
+if(this.cfg.cap&&this.captain&&this.P.get(this.captain)?.alive){this.cands=pool;this.tieN=n;this.tieSure=sure;this.step='tie';this.actor=this.captain;return}
+this.lot=true;const a=[...pool],pick=[];while(pick.length<n&&a.length)pick.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);[...sure,...pick].forEach(i=>this.vdie(i));this.settle()}
+tallyS(gr,rd){if(!gr.length){this.rd=null;return this.settle()}
+const top=gr[0].ids;
+if(rd.r===1){const c=top.length===1&&gr[1]?[...top,...gr[1].ids]:top;if(c.length===1){this.rd=null;this.vdie(c[0]);return this.settle()}return this.runoff('s',2,c)}
+if(top.length===1){this.rd=null;this.vdie(top[0]);return this.settle()}
+if(rd.r===2)return this.runoff('s',3,top);
+return this.finalTie(top,1,[])}
+tallyF(gr,rd){let need=rd.need??2;const sure=rd.sure?[...rd.sure]:[];let pool=null;
+for(const g of gr){if(need<=0)break;if(g.ids.length<=need){sure.push(...g.ids);need-=g.ids.length}else{pool=g.ids;break}}
+if(!pool||need<=0){this.rd=null;sure.forEach(i=>this.vdie(i));return this.settle()}
+if(rd.r===1)return this.runoff('f',2,pool,{sure,need});
+return this.finalTie(pool,need,sure)}
 vv(){const i=this.victim,q=i&&this.P.get(i);if(!i||this.protect===i)return null;if(q&&q.role==='alter'&&!(q.bites>0))return null;return i}
 L(o){(this.log||(this.log=[])).push({n:this.nn,...o})}
-evMorning(){const c=this.cfg;if(!c.ev||c.ev==='aus'){this.tf=null;return}
+evMorning(){const c=this.cfg;this.ef=null;this.noCap=null;if(!c.ev||c.ev==='aus'){this.tf=null;return}
 const tf=this.tf||(this.tf={seq:0,u:0,notes:[]});tf.notes=tf.notes.filter(n=>n.k==='perm');tf.fresh=[];const add=[],mk=this.markId&&this.P.get(this.markId);
 if(mk&&mk.alive)add.push({id:'brief',k:'once',t:'Anonymer Brief',x:`Ein anonymer Brief ist im Dorf eingegangen: ${mk.name} ist verdächtig! (Abstimmung +1)`});
 const d=this.nn,fr={selten:3,mittel:2,taeglich:1}[c.ev];
 if(d>=2&&(d-2)%fr===0){const used=new Set(this.evDrawn||[]),perm=tf.notes.map(n=>n.id),KR=['krone','richter'],
 ok=EV.filter(x=>(c.evOn||[]).includes(x.id)&&!used.has(x.id)&&!(x.g==='dauer'&&(perm.length>=2||(KR.includes(x.id)&&perm.some(i=>KR.includes(i))))));
-if(ok.length){const x=ok[Math.floor(Math.random()*ok.length)];this.evDrawn=[...used,x.id];const n=this.evMake(x);add.push(n);this.L({e:'ev',card:x.id,t:x.t,x:n.x,d:1})}}
+if(ok.length){const x=ok[Math.floor(Math.random()*ok.length)];this.evDrawn=[...used,x.id];const n=this.evMake(x);this.ef={id:x.id,...(n.ef||{})};delete n.ef;add.push(n);this.L({e:'ev',card:x.id,t:x.t,x:n.x.replace('{z}',n.bell?n.bell.n:''),d:1})}}
 for(const n of add){n.u=++tf.u;const used=new Set(tf.notes.map(z=>z.z)),fr=[0,1,2,3,4,5].filter(i=>!used.has(i)),zi=fr.length?fr[Math.floor(Math.random()*fr.length)]:Math.floor(Math.random()*6),R=()=>Math.random()*2-1;n.z=zi;n.s=[+(32+(zi%3)*18+R()*2.5-22).toFixed(1),+(26+Math.floor(zi/3)*23+R()*2.5-20).toFixed(1),+(R()*6).toFixed(1)];tf.notes.push(n);tf.fresh.push(n.u)}if(add.length)tf.seq++}
-evMake(x){const A=this.A,pk=a=>a[Math.floor(Math.random()*a.length)],nm=p=>p?p.name:'jemand';let t=x.x,priv=null;
-if(['verbannt','gnade','rufmord','beichtstuhl','stumme','schlaftrunk'].includes(x.id))t=t.replace('{a}',nm(pk(A)));
+evMake(x){const A=this.A,pk=a=>a[Math.floor(Math.random()*a.length)],nm=p=>p?p.name:'jemand';let t=x.x,priv=null,bell=null;
+let ef=null;if(['verbannt','gnade','rufmord','beichtstuhl','stumme','schlaftrunk'].includes(x.id)){const q=pk(A);t=t.replace('{a}',nm(q));ef={a:q&&q.id}}
 else if(x.id==='geruecht'){const wv=A.filter(y=>y.role==='werwolf'),f=pk(wv.length?wv:A),s=[f,pk(A.filter(y=>y!==f))].sort(()=>Math.random()-.5);t=t.replace('{a}',nm(s[0])).replace('{b}',nm(s[1]))}
 else if(x.id==='wanderer'){const r=pk(A),o=A.filter(y=>y!==r&&y.role!=='werwolf');if(r&&o.length)priv={id:r.id,x:`Der Wanderer flüstert dir zu: ${pk(o).name} ist kein Werwolf.`}}
-else if(x.id==='glocken')t=t.replace('{z}',this.W.length);
+else if(x.id==='glocken')bell={n:this.W.length,t:Date.now()+6000};
 else if(x.id==='wunder'){const w=(this.dead||[]).filter(q=>q.how==='wolf').map(q=>this.P.get(q.id)?.name).filter(Boolean);t=t.replace('{a}',w.length?': '+w.join(' und '):'')}
-return{id:x.id,k:x.g==='dauer'?'perm':'once',t:x.t,x:t,priv}}
+return{id:x.id,k:x.g==='dauer'?'perm':'once',t:x.t,x:t,priv,bell,ef}}
 rv(x){return x.role==='schwester'&&![...this.P.values()].some(y=>y!==x&&y.role==='schwester')?'dorfbewohner':x.role}
 despair(){this.L({e:'desp',d:this.phase==='night'?0:1});for(const x of this.P.values())if(x.alive&&['seherin','hexe','jaeger','heiler','dorfdepp','maedchen','amor','dieb','wolfshund','suendenbock','lehrling','rabe'].includes(x.role)){x.orig=x.role;x.role='dorfbewohner'};this.desp=true}
 vdie(id){const p=this.P.get(id);if(p&&p.alive&&p.role==='dorfdepp'&&!p.fool){p.fool=true;this.fool=id;this.L({e:'fool',id,d:1});this.foolCap=this.captain===id;if(this.foolCap){this.captain=null;this.capNew=null}return}this.die(id,'vote')}
@@ -161,11 +180,12 @@ tallyW(){const c={};for(const b of this.votes.values())c[b]=(c[b]||0)+1;this.res
 this.votes=new Map();if(top.length>1&&this.rnd<3){this.cands=top;this.rnd++;this.retry=1;return}
 if(top.length>1&&this.cfg.capTie==='entfall'){this.retry=0;this.cands=null;this.captain=null;this.capNew=null;this.capNone=true;if(this.aw==='night'){this.aw=null;this.step='cap'}else{this.step='talk';this.startT()}return}
 let o=top[0];if(top.length>1){o=top[Math.floor(crypto.getRandomValues(new Uint32Array(1))[0]/2**32*top.length)];this.lot=true}
-this.retry=0;this.cands=null;this.captain=o;this.capNew=o;this.capHow='wahl';if(this.aw==='night'){this.aw=null;this.step='cap'}else{this.step='talk';this.startT()}}
+this.retry=0;this.cands=null;this.noCap=null;this.captain=o;this.capNew=o;this.capHow='wahl';if(this.aw==='night'){this.aw=null;this.step='cap'}else{this.step='talk';this.startT()}}
 settle(){while(this.pend.length&&!this.A.length)this.pend.shift();
 if(!this.pend.length){const x=this.check();if(x)return this.fin(x)}
 const q=this.pend[0];if(q){this.sn=true;this.step=q.t;this.actor=q.id;return this.push()}
-this.actor=null;this.step=this.cont;if(this.step==='talk')this.startT();if(this.step==='wahl'){this.sn=true;this.initW()}this.push()}
+this.actor=null;if(this.cont==='talk'&&this.ef&&this.ef.id==='machtwechsel'&&!this.ef.done&&this.cfg.cap&&this.captain&&this.P.get(this.captain)?.alive){this.ef.done=1;this.noCap=this.captain;this.captain=null;this.capNew=null;this.cont='wahl'}
+this.step=this.cont;if(this.step==='talk')this.startT();if(this.step==='wahl'){this.sn=true;this.initW()}this.push()}
 check(){const A=this.A,w=A.filter(x=>x.role==='werwolf').length,o=A.length-w;
 if(this.lovers&&A.length===2&&this.lovers.every(i=>this.P.get(i).alive))return w===2?'wolf':'liebe';
 if(!w)return'dorf';if(!o)return'wolf';
@@ -174,22 +194,22 @@ return null}
 fin(w){const L=[...this.P.values()];if((w==='dorf'||w==='wolf')&&this.A.length===2&&this.W.length===1){const l=this.A.find(x=>(x.role==='werwolf')===(w==='dorf'));if(l)l.alive=false}this.win={w,ids:w==='dorf'?L.filter(x=>x.role!=='werwolf').map(x=>x.id):w==='wolf'?L.filter(x=>x.role==='werwolf').map(x=>x.id):[]};this.phase='over';this.step=null;this.push()}
 start(){const ids=[...this.P.keys()],list=build(ids.length,this.cfg);if(!list)return;this.hr=[...new Set(list)];shuf(list);let sp=[];
 if(list.includes('dieb')){list.splice(list.indexOf('dieb'),1);sp=[list.pop(),list.pop()];list.push('dieb');shuf(list)}
-this.spare=sp;ids.forEach((id,i)=>this.P.get(id).role=list[i]);this.appId=null;this.markId=null;this.log=[];this.tf=null;this.evDrawn=[];this.dieb=ids.find(id=>this.P.get(id).role==='dieb')||null;this.thiefDone=false;this.thiefId=null;this.redo=new Set();this.seenR=new Set();this.readyAt=0;this.phase='roles'}
+this.spare=sp;ids.forEach((id,i)=>this.P.get(id).role=list[i]);this.appId=null;this.markId=null;this.log=[];this.tf=null;this.evDrawn=[];this.ef=null;this.rd=null;this.noCap=null;this.tieN=1;this.tieSure=[];this.dieb=ids.find(id=>this.P.get(id).role==='dieb')||null;this.thiefDone=false;this.thiefId=null;this.redo=new Set();this.seenR=new Set();this.readyAt=0;this.phase='roles'}
 thiefPick(p,i){const sp=this.spare,must=sp.every(x=>x==='werwolf');if(i===-1&&!must){}else if(i===0||i===1){p.role=sp[i];p.origin='dieb';sp[i]='dieb';if(p.role==='schwester'){const o=[...this.P.values()].find(x=>x!==p&&x.role==='schwester');if(o){this.seenR.delete(o.id);this.redo.add(o.id)}}}else return;this.L({e:'thief',id:p.id,r:i===-1?null:p.role,d:0});this.thiefDone=true;this.thiefId=p.id;this.seenR.add(p.id);this.chk();this.push()}
 thiefAuto(){const p=this.dieb&&!this.thiefDone?this.P.get(this.dieb):null;if(p)this.thiefPick(p,this.spare.every(x=>x==='werwolf')?0:-1)}
 chk(){if(this.seenR.size>=this.P.size&&!this.readyAt&&![...this.P.values()].some(x=>x.role==='wolfshund')){this.readyAt=Date.now()+this.cfg.rolePause*1000;setTimeout(()=>this.push(),this.cfg.rolePause*1000+150)}}
 dogAuto(){for(const x of this.P.values())if(x.role==='wolfshund')x.role=Math.random()<.5?'werwolf':'dorfbewohner'}
 ready(){return this.seenR.size>=this.P.size&&this.readyAt>0&&Date.now()>=this.readyAt}
-startT(){this.tEnd=this.cfg.timer>0?Date.now()+this.cfg.timer*1000:0}
+startT(){this.tEnd=this.cfg.timer>0&&!(this.ef&&this.ef.id==='eil')?Date.now()+this.cfg.timer*1000:0}
 push(){this.save();for(const p of this.P.values()){try{p.ws?.send(JSON.stringify(this.view(p)))}catch{}}}
-view(p){const L=[...this.P.values()],s=this.step,ph=this.phase,v={phase:ph,step:s,host:this.host,cfg:this.cfg,win:this.win,dead:this.dead,kind:this.kind,captain:this.captain,actor:this.actor,locked:this.locked,res:this.res,capNone:this.capNone,vset:this.vset,bockId:this.bockId,desp:this.desp,bit:this.bitId===p.id,cur:this.curseId===p.id,letter:this.phase==='day'&&this.markId&&this.P.get(this.markId)?.alive?this.markId:null,app:this.appId===p.id&&this.dead.some(x=>x.id===this.appFrom),appS:this.appId===p.id,fool:this.fool,foolCap:this.foolCap,tEnd:this.tEnd,now:Date.now(),retry:this.retry,capHow:this.capHow,lot:this.lot,cands:this.cands,rnd:this.rnd,capNew:this.capNew,news:this.sn,pm:this.pend.some(q=>q.id===p.id),
+view(p){const L=[...this.P.values()],s=this.step,ph=this.phase,v={phase:ph,step:s,host:this.host,cfg:this.cfg,win:this.win,dead:this.dead,kind:this.kind,captain:this.captain,actor:this.actor,locked:this.locked,res:this.res,capNone:this.capNone,vset:this.vset,bockId:this.bockId,desp:this.desp,bit:this.bitId===p.id,cur:this.curseId===p.id,letter:this.phase==='day'&&this.markId&&this.P.get(this.markId)?.alive?this.markId:null,app:this.appId===p.id&&this.dead.some(x=>x.id===this.appFrom),appS:this.appId===p.id,fool:this.fool,foolCap:this.foolCap,tEnd:this.tEnd,now:Date.now(),retry:this.retry,capHow:this.capHow,lot:this.lot,cands:this.cands,rnd:this.rnd,capNew:this.capNew,news:this.sn,pm:this.pend.some(q=>q.id===p.id),ef:this.ef?{id:this.ef.id,a:this.ef.a}:null,noCap:this.noCap,vr:this.rd?this.rd.r:1,vm:this.rd?this.rd.m:null,tieN:this.tieN||1,
 me:{id:p.id,name:p.name,role:p.role,alive:p.alive,fool:!!p.fool},
 players:L.map(x=>({id:x.id,name:x.name,alive:x.alive,on:!!x.ws,fool:!!x.fool,orig:ph==='over'?(x.role==='schwester'&&this.rv(x)!=='schwester'?'schwester':x.orig):undefined,role:((!x.alive&&this.cfg.reveal)||ph==='over'||x.id===p.id||x.fool)?this.rv(x):undefined}))};
 if(this.lovers&&(ph==='over'||this.lovers.includes(p.id)))v.lovers=this.lovers;
 if(ph!=='lobby')v.hr=this.hr;
 if(ph==='over')v.log=this.log||[];
 if(ph==='lobby')v.evc=EV.map(x=>({id:x.id,g:x.g,t:x.t}));
-if(ph!=='lobby'&&this.cfg.ev&&this.cfg.ev!=='aus'&&this.tf)v.tf={seq:this.tf.seq,fresh:this.tf.fresh||[],notes:this.tf.notes.map(n=>({u:n.u,id:n.id,k:n.k,s:n.s,t:n.t,x:n.x+(n.priv&&n.priv.id===p.id?'\n\n'+n.priv.x:'')}))};
+if(ph!=='lobby'&&this.cfg.ev&&this.cfg.ev!=='aus'&&this.tf)v.tf={seq:this.tf.seq,fresh:this.tf.fresh||[],notes:this.tf.notes.map(n=>({u:n.u,id:n.id,k:n.k,s:n.s,bell:n.bell||undefined,t:n.t,x:n.x+(n.priv&&n.priv.id===p.id?'\n\n'+n.priv.x:'')}))};
 if(p.role==='schwester'&&ph!=='lobby'){const o=L.find(x=>x!==p&&x.role==='schwester');v.sis=o?o.id:null}
 if(p.role==='werwolf'&&ph!=='lobby')v.mates=L.filter(x=>x.role==='werwolf').map(x=>x.id);
 if(ph==='night'&&p.alive){
