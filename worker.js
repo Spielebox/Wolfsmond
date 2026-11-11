@@ -148,7 +148,7 @@ if(ok.length){const x=ok[Math.floor(Math.random()*ok.length)];this.evDrawn=[...u
 for(const n of add){n.u=++tf.u;const used=new Set(tf.notes.map(z=>z.z)),fr=[0,1,2,3,4,5].filter(i=>!used.has(i)),zi=fr.length?fr[Math.floor(Math.random()*fr.length)]:Math.floor(Math.random()*6),R=()=>Math.random()*2-1;n.z=zi;n.s=[+(32+(zi%3)*18+R()*2.5-22).toFixed(1),+(26+Math.floor(zi/3)*23+R()*2.5-20).toFixed(1),+(R()*6).toFixed(1)];tf.notes.push(n);tf.fresh.push(n.u)}if(add.length)tf.seq++}
 evMake(x){const A=this.A,pk=a=>a[Math.floor(Math.random()*a.length)],nm=p=>p?p.name:'jemand';let t=x.x,priv=null;
 if(['verbannt','gnade','rufmord','beichtstuhl','stumme','schlaftrunk'].includes(x.id))t=t.replace('{a}',nm(pk(A)));
-else if(x.id==='geruecht'){const s=[...A].sort(()=>Math.random()-.5);t=t.replace('{a}',nm(s[0])).replace('{b}',nm(s[1]))}
+else if(x.id==='geruecht'){const wv=A.filter(y=>y.role==='werwolf'),f=pk(wv.length?wv:A),s=[f,pk(A.filter(y=>y!==f))].sort(()=>Math.random()-.5);t=t.replace('{a}',nm(s[0])).replace('{b}',nm(s[1]))}
 else if(x.id==='wanderer'){const r=pk(A),o=A.filter(y=>y!==r&&y.role!=='werwolf');if(r&&o.length)priv={id:r.id,x:`Der Wanderer flüstert dir zu: ${pk(o).name} ist kein Werwolf.`}}
 else if(x.id==='glocken')t=t.replace('{z}',this.W.length);
 else if(x.id==='wunder'){const w=(this.dead||[]).filter(q=>q.how==='wolf').map(q=>this.P.get(q.id)?.name).filter(Boolean);t=t.replace('{a}',w.length?': '+w.join(' und '):'')}
