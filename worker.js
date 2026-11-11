@@ -145,7 +145,7 @@ const d=this.nn,fr={selten:3,mittel:2,taeglich:1}[c.ev];
 if(d>=2&&(d-2)%fr===0){const used=new Set(this.evDrawn||[]),perm=tf.notes.map(n=>n.id),KR=['krone','richter'],
 ok=EV.filter(x=>(c.evOn||[]).includes(x.id)&&!used.has(x.id)&&!(x.g==='dauer'&&(perm.length>=2||(KR.includes(x.id)&&perm.some(i=>KR.includes(i))))));
 if(ok.length){const x=ok[Math.floor(Math.random()*ok.length)];this.evDrawn=[...used,x.id];const n=this.evMake(x);add.push(n);this.L({e:'ev',card:x.id,t:x.t,x:n.x,d:1})}}
-for(const n of add){n.u=++tf.u;tf.notes.push(n);tf.fresh.push(n.u)}if(add.length)tf.seq++}
+for(const n of add){n.u=++tf.u;const used=new Set(tf.notes.map(z=>z.z)),fr=[0,1,2,3,4,5].filter(i=>!used.has(i)),zi=fr.length?fr[Math.floor(Math.random()*fr.length)]:Math.floor(Math.random()*6),R=()=>Math.random()*2-1;n.z=zi;n.s=[+(32+(zi%3)*18+R()*2.5-22).toFixed(1),+(26+Math.floor(zi/3)*23+R()*2.5-20).toFixed(1),+(R()*6).toFixed(1)];tf.notes.push(n);tf.fresh.push(n.u)}if(add.length)tf.seq++}
 evMake(x){const A=this.A,pk=a=>a[Math.floor(Math.random()*a.length)],nm=p=>p?p.name:'jemand';let t=x.x,priv=null;
 if(['verbannt','gnade','rufmord','beichtstuhl','stumme','schlaftrunk'].includes(x.id))t=t.replace('{a}',nm(pk(A)));
 else if(x.id==='geruecht'){const s=[...A].sort(()=>Math.random()-.5);t=t.replace('{a}',nm(s[0])).replace('{b}',nm(s[1]))}
@@ -189,7 +189,7 @@ if(this.lovers&&(ph==='over'||this.lovers.includes(p.id)))v.lovers=this.lovers;
 if(ph!=='lobby')v.hr=this.hr;
 if(ph==='over')v.log=this.log||[];
 if(ph==='lobby')v.evc=EV.map(x=>({id:x.id,g:x.g,t:x.t}));
-if(ph!=='lobby'&&this.cfg.ev&&this.cfg.ev!=='aus'&&this.tf)v.tf={seq:this.tf.seq,fresh:this.tf.fresh||[],notes:this.tf.notes.map(n=>({u:n.u,id:n.id,k:n.k,t:n.t,x:n.x+(n.priv&&n.priv.id===p.id?'\n\n'+n.priv.x:'')}))};
+if(ph!=='lobby'&&this.cfg.ev&&this.cfg.ev!=='aus'&&this.tf)v.tf={seq:this.tf.seq,fresh:this.tf.fresh||[],notes:this.tf.notes.map(n=>({u:n.u,id:n.id,k:n.k,s:n.s,t:n.t,x:n.x+(n.priv&&n.priv.id===p.id?'\n\n'+n.priv.x:'')}))};
 if(p.role==='schwester'&&ph!=='lobby'){const o=L.find(x=>x!==p&&x.role==='schwester');v.sis=o?o.id:null}
 if(p.role==='werwolf'&&ph!=='lobby')v.mates=L.filter(x=>x.role==='werwolf').map(x=>x.id);
 if(ph==='night'&&p.alive){
