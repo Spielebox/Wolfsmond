@@ -104,7 +104,7 @@ else if(s==='lovers'&&this.lovers?.includes(p.id)&&t==='lok'){this.lk.add(p.id);
 else if(s==='raven'&&p.role==='rabe'&&t==='mark'&&(m.id===null||this.P.get(m.id)?.alive)){this.markId=m.id;if(m.id)this.L({e:'mark',id:m.id,d:0});this.next('raven')}
 else if(s==='prot'&&p.role==='heiler'&&t==='prot'&&m.id!==this.lastProt&&this.P.get(m.id)?.alive){this.protect=m.id;this.next('prot')}
 else if(s==='wolves'&&p.role==='werwolf'){
-if(t==='pick'&&this.P.get(m.id)?.alive&&this.P.get(m.id).role!=='werwolf'){this.wp.set(p.id,m.id);this.wok.clear()}
+if(t==='pick'&&this.P.get(m.id)?.alive&&this.P.get(m.id).role!=='werwolf'){if(this.wp.get(p.id)!==m.id){this.wp.set(p.id,m.id);const c={};for(const t of this.wp.values())c[t]=(c[t]||0)+1;const mx=Math.max(...Object.values(c)),top=Object.keys(c).filter(k=>c[k]===mx);if(!(top.length===1&&[...this.wok].every(i=>this.wp.get(i)===top[0])))this.wok.clear()}}
 if(t==='ok'&&(this.cfg.u?this.same():this.wp.has(p.id)))this.wok.add(p.id);
 if(this.W.every(x=>this.wok.has(x.id)))this.wolvesDone()}
 else if(s==='seer'&&p.role==='seherin'){
@@ -193,7 +193,7 @@ if(ph!=='lobby'&&this.cfg.ev&&this.cfg.ev!=='aus'&&this.tf)v.tf={seq:this.tf.seq
 if(p.role==='schwester'&&ph!=='lobby'){const o=L.find(x=>x!==p&&x.role==='schwester');v.sis=o?o.id:null}
 if(p.role==='werwolf'&&ph!=='lobby')v.mates=L.filter(x=>x.role==='werwolf').map(x=>x.id);
 if(ph==='night'&&p.alive){
-if(s==='wolves'&&p.role==='werwolf'){const c={};for(const t of this.wp.values())c[t]=(c[t]||0)+1;Object.assign(v,{picks:c,mine:this.wp.get(p.id),ok:this.wok.has(p.id),can:this.cfg.u?this.same():this.wp.has(p.id)})}
+if(s==='wolves'&&p.role==='werwolf'){const c={};for(const t of this.wp.values())c[t]=(c[t]||0)+1;const cf={};for(const[wi,t]of this.wp)if(this.wok.has(wi))(cf[t]=cf[t]||[]).push(wi===p.id?'me':'o');Object.assign(v,{picks:c,confs:cf,mine:this.wp.get(p.id),ok:this.wok.has(p.id),can:this.cfg.u?this.same():this.wp.has(p.id)})}
 if(s==='seer'&&p.role==='seherin')v.seen=this.seen;
 if(s==='thief'&&(p.role==='dieb'||p.id===this.thiefId)){v.thiefDone=this.thiefDone;if(!this.thiefDone){v.spare=this.spare;v.must=this.spare.every(x=>x==='werwolf')}}
 if(s==='prot'&&p.role==='heiler')v.last=this.lastProt;
