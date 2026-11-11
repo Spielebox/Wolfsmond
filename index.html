@@ -62,25 +62,25 @@ html.sm .stabc{display:block}
 #tfo.out .tfd{opacity:0}
 .tfw{position:absolute;left:50%;top:50%;width:min(94%,400px);aspect-ratio:878/917;margin:calc(min(94%,400px)*-.54) 0 0 calc(min(94%,400px)/-2);transition:transform .7s cubic-bezier(.5,0,.3,1),opacity .6s}
 .tft{width:100%;display:block;filter:drop-shadow(0 12px 22px #000)}
-.tz{position:absolute;width:32%;aspect-ratio:406/511;cursor:pointer}
+.tz{position:absolute;width:44%;aspect-ratio:1;cursor:pointer}
 .tz img{width:100%;height:100%;display:block;filter:drop-shadow(1px 3px 4px #0009)}
-.tz span{position:absolute;left:19%;right:19%;top:30%;bottom:12%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(9px,2.9vw,12px);text-align:center;font-weight:700;color:#3b2a14;line-height:1.1;overflow:hidden;overflow-wrap:anywhere;hyphens:auto}
-.tz.drop{animation:tdrop 1s both}
+.tz span{position:absolute;left:29%;right:29%;top:28%;bottom:25%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(9px,2.9vw,12px);text-align:center;font-weight:700;color:#3b2a14;line-height:1.1;overflow:hidden;overflow-wrap:anywhere;hyphens:auto}
+.tz.rd{visibility:hidden}.tz.drop{animation:tdrop 1s both}
 @keyframes tdrop{0%{opacity:0;translate:0 -70px;scale:1.6}55%{opacity:1;translate:0 4px;scale:1.04}75%{translate:0 -3px;scale:1}100%{opacity:1;translate:0 0;scale:1}}
 .tfh{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 34px);text-align:center;font-size:14px;opacity:0;transition:opacity .6s;color:#f1e6d0cc}.tfh.on{opacity:1}
 .tfr{position:absolute;inset:0;background:#000a;display:flex;align-items:center;justify-content:center}
-.tfp{position:relative;width:88%;max-width:400px;aspect-ratio:406/511;animation:tgrow .45s cubic-bezier(.2,.8,.3,1.1) both}
-@keyframes tgrow{from{transform:scale(.35) rotate(4deg);opacity:.4}}
-.tfp>img{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 14px 28px #000)}
-.tfp>div{position:absolute;left:17%;right:17%;top:25%;bottom:14%;color:#3b2a14;text-align:center;display:flex;flex-direction:column;justify-content:center}
-.tfp h2{margin:0 0 10px;font-size:26px;color:#3b2a14}.tfp p{margin:0;line-height:1.35;color:#3b2a14}.tfp small{display:block;margin-top:12px;font-size:12px;opacity:.65;color:#3b2a14}
+.tfp{position:relative;width:min(88%,400px);aspect-ratio:406/511;transition:transform .5s cubic-bezier(.3,.7,.2,1),opacity .4s}
+.tfr{transition:background .4s}
+.tfp>img{position:absolute;width:188.9%;height:150.3%;left:-44.6%;top:-21.9%;filter:drop-shadow(0 14px 28px #000)}
+.tfp>div{position:absolute;left:10%;right:10%;top:17%;bottom:10%;color:#3b2a14;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.tfp h2{margin:0 0 10px;font-size:28px;color:#3b2a14}.tfp p{margin:0;line-height:1.35;color:#3b2a14}.tfp small{display:block;margin-top:12px;font-size:12px;opacity:.65;color:#3b2a14}
 .hb{position:fixed;top:max(10px,env(safe-area-inset-top));right:12px;width:40px;height:40px;padding:0;border-radius:50%;background:#0b0d17b3;font-size:22px;font-weight:700;line-height:1;z-index:5;margin:0;overflow:hidden}.hb img{width:100%;height:100%;display:block}
 .x{position:fixed;top:max(10px,env(safe-area-inset-top));left:12px;width:40px;height:40px;padding:0;border-radius:50%;background:#0b0d17b3;font-size:20px;line-height:1;z-index:5;margin:0}
 details{border:1px solid #ffffff22;border-radius:10px;margin:6px 0;padding:2px 12px;text-align:left}summary{font-weight:700;padding:10px 0;cursor:pointer}details p{margin:2px 0 10px}.grp.on{border-color:var(--ac)}.grp .bd{background:var(--ac);color:#111;border-radius:10px;padding:1px 8px;font-size:.75em;margin-left:8px;font-weight:700}.grp summary small{display:block;font-weight:400;opacity:.8;margin-top:2px}.grp[open] .gn{display:none}.grp .row{margin:0}
 .ov{position:fixed;inset:0;background:#000d;display:flex;flex-direction:column;justify-content:center;padding:24px;z-index:9}
 .logo{display:block;width:72%;max-width:300px;margin:10px auto;border-radius:14px}
 </style></head><body><main id="a"></main><script>
-const VER='1.12.-1';
+const VER='1.12.-2';
 (()=>{const i=new Image();i.onload=()=>{try{const w=i.naturalWidth,h=i.naturalHeight,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(i,0,0);const d=x.getImageData(0,0,w,h),p=d.data;for(let k=0;k<p.length;k+=4){const r=p[k],g=p[k+1],b=p[k+2],a=p[k+3],mx=Math.max(r,g,b),mn=Math.min(r,g,b);const ok=a>0&&r>b+5&&mx>0&&(mx-mn)/mx>.18;p[k]=p[k+1]=p[k+2]=255;p[k+3]=ok?a:0}x.putImageData(d,0,0);document.documentElement.style.setProperty('--sm','url('+c.toDataURL()+')');document.documentElement.classList.add('sm')}catch(e){}};i.src='images/balken.png'})();
 const WS='wss://wolfsmond.spam-lama.workers.dev';
 const R={werwolf:['Werwolf','🐺'],dorfbewohner:['Dorfbewohner','🧑‍🌾'],seherin:['Seherin','🔮'],hexe:['Hexe','🧪'],jaeger:['Jäger','🏹'],amor:['Amor','💘'],heiler:['Heiler','💚'],maedchen:['Blinzelndes Mädchen','👀'],dieb:['Dieb','🗝️'],wolfshund:['Wolfshund','🐕'],dorfdepp:['Dorfdepp','🤪'],alter:['Der Alte','👴'],suendenbock:['Sündenbock','🐐'],verfluchter:['Verfluchter','🌘'],schwester:['Schwester','👭'],lehrling:['Lehrling der Seherin','🕯️'],verdaechtiger:['Verdächtiger','🕵️'],rabe:['Rabe','🐦'],brief:['Brief','✉️']};
@@ -131,7 +131,7 @@ key=x=>x.n*2+(x.d||0),g=[];L.map((x,i)=>[x,i]).sort((a,b)=>key(a[0])-key(b[0])||
 return`<h2>Rückblick</h2>`+(g.length?g.map(c=>`<small>${c.t}</small><div style="text-align:left;border:1px solid #ffffff22;border-radius:10px;padding:6px 12px;margin:6px 0">`+c.l.map(s=>`<p style="margin:6px 0">${s}</p>`).join('')+'</div>').join(''):'<p>Es gibt keine Ereignisse zum Anzeigen.</p>')+ib('weiter','Zurück','rk=0;render();window.scrollTo(0,0)')};
 var tfO=0,tfRd=0,tfSeen=0,tfAt=0,tfTm=0,tfFr=[],tfCl=0,tfKey='';
 const EVGN={tag:'Abstimmung und Tag',info:'Information',nacht:'Nacht und Rollen',dauer:'Dauerhaft (bis Spielende)'},
-TFS=[[9,4,-5],[40,6,3],[21,31,-3],[48,33,4]],TFM=[[22,16,-8],[46,16,6],[32,40,-3],[54,42,5]],
+TFS=[[8,12,-5],[34,13,3],[18,35,-3],[44,37,4]],TFM=[[22,16,-8],[46,16,6],[32,40,-3],[54,42,5]],
 evon=(ids,x)=>send({t:'evon',ids,v:x}),
 evSet=c=>c.ev==='aus'?'':['tag','info','nacht','dauer'].map(g=>{const ks=(v.evc||[]).filter(x=>x.g===g),own=c.evOn||[],on=ks.filter(x=>own.includes(x.id)),ids=JSON.stringify(ks.map(x=>x.id)).replace(/"/g,"'");
 return`<details class="grp${on.length?' on':''}" ${ho['e'+g]?'open':''} ontoggle="ho['e${g}']=this.open"><summary>${EVGN[g]}<span class=bd>${on.length} von ${ks.length}</span></summary><div style="display:flex;gap:8px"><button style="flex:1" onclick="evon(${ids},1)">Alle an</button><button style="flex:1" onclick="evon(${ids},0)">Alle aus</button></div>`+ks.map(x=>`<label class=row><span>${x.t}</span><input type=checkbox ${own.includes(x.id)?'checked':''} onchange="evon(['${x.id}'],this.checked)"></label>`).join('')+'</details>'}).join(''),
@@ -140,15 +140,20 @@ tfCheck=()=>{if(!v)return;if(v.phase==='lobby'){tfSeen=0;if(tfO){tfO=0;tfRender(
 if(v.phase==='day'&&T.seq>tfSeen&&T.fresh.length&&(v.step==='talk'||v.step==='wahl')&&!tfO&&!tfTm)tfTm=setTimeout(()=>{tfTm=0;if(v&&v.tf&&v.tf.seq>tfSeen&&!tfO)tfOpen(1)},4000);
 if(tfO&&!tfCl&&tfKey!==T.seq+':'+T.notes.length)tfRender(0)},
 tfOpen=f=>{if(!v||!v.tf)return;clearTimeout(tfTm);tfTm=0;tfO=1;tfCl=0;tfFr=f?v.tf.fresh.slice():[];tfRd=0;tfAt=f?Date.now():0;tfSeen=v.tf.seq;tfRender(1);render()},
-tfRead=u=>{tfRd=u;tfFr=[];tfRender(0)},
+tfRead=(u,e)=>{const z=e&&e.currentTarget,zr=z&&z.getBoundingClientRect();tfRd=u;tfFr=[];tfRender(0);const p=document.querySelector('.tfp'),r=document.querySelector('.tfr');if(!p||!zr)return;tfZ(p,r,zr,1)},
+tfZ=(p,r,b,open)=>{const a=p.getBoundingClientRect(),t=`translate(${b.left+b.width/2-a.left-a.width/2}px,${b.top+b.height*.478-a.top-a.height/2}px) scale(${.53*b.width/a.width})`;
+if(open){p.style.transition='none';p.style.transform=t;p.style.opacity='.5';r.style.background='#0000';void p.offsetWidth;p.style.transition='';r.style.background='';p.style.transform='';p.style.opacity=''}
+else{p.style.transform=t;p.style.opacity='.3';r.style.background='#0000'}},
+tfUnread=()=>{const p=document.querySelector('.tfp'),r=document.querySelector('.tfr'),z=document.querySelector('.tz.rd');if(!p||!z||tfCl){tfRd=0;tfRender(0);return}tfCl=1;tfZ(p,r,z.getBoundingClientRect(),0);setTimeout(()=>{tfCl=0;tfRd=0;tfRender(0)},480)},
 tfShut=()=>{if(tfCl||(tfAt&&Date.now()-tfAt<3000))return;const w=document.getElementById('tfw'),b=document.getElementById('tfb'),el=document.getElementById('tfo');if(!w||!el){tfO=0;tfRender(0);return}
 tfCl=1;if(b){const a=w.getBoundingClientRect(),r=b.getBoundingClientRect();w.style.transform=`translate(${r.left+r.width/2-a.left-a.width/2}px,${r.top+r.height/2-a.top-a.height/2}px) scale(${r.width/a.width})`;w.style.opacity='0'}
 el.classList.add('out');setTimeout(()=>{tfO=0;tfRd=0;tfCl=0;tfRender(0);render()},700)},
 tfRender=first=>{let el=document.getElementById('tfo');if(!el){el=document.createElement('div');el.id='tfo';document.body.appendChild(el)}
 const T=v&&v.tf;if(!tfO||!T){el.className='';el.innerHTML='';return}
 tfKey=T.seq+':'+T.notes.length;const ns=T.notes.slice().sort((a,b)=>(a.k==='perm'?0:1)-(b.k==='perm'?0:1)).slice(0,4),rd=tfRd&&T.notes.find(z=>z.u===tfRd);
-el.innerHTML=`<div class="tfd${first?' fi':''}" onclick="tfShut()"><div id=tfw class=tfw onclick="event.stopPropagation()"><img class=tft src="images/tafel.png">${ns.map((n,i)=>{const f=tfFr.includes(n.u),s=TFS[i];return`<div class="tz${f?' drop':''}" style="left:${s[0]}%;top:${s[1]}%;transform:rotate(${s[2]}deg);${f?`animation-delay:${(.5+tfFr.indexOf(n.u)*1.1).toFixed(1)}s`:''}" onclick="tfRead(${n.u})"><img src="images/zettel.png"><span>${n.t.replace(" ","<br>")}</span></div>`}).join('')}</div><div class="tfh${tfAt?'':' on'}" id=tfh>${ns.length?'Tippe auf einen Zettel zum Lesen<br>':'Es hängen noch keine Zettel.<br>'}Tippe neben die Tafel zum Schließen</div></div>`+(rd?`<div class=tfr onclick="tfRd=0;tfRender(0)"><div class=tfp><img src="images/zettel.png"><div><h2>${rd.t}</h2><p style="font-size:${rd.x.length>110?'14px':'16px'}">${rd.x.replace(/\n/g,'<br>')}</p><small>Antippen zum Schließen</small></div></div></div>`:'');
-el.className='on';if(first&&tfAt)setTimeout(()=>{const h=document.getElementById('tfh');if(h)h.classList.add('on')},3000)};
+el.innerHTML=`<div class="tfd${first?' fi':''}" onclick="tfShut()"><div id=tfw class=tfw onclick="event.stopPropagation()"><img class=tft src="images/tafel.png">${ns.map((n,i)=>{const f=tfFr.includes(n.u),s=TFS[i];return`<div class="tz${f?' drop':''}${rd&&rd.u===n.u?' rd':''}" style="left:${s[0]}%;top:${s[1]}%;transform:rotate(${s[2]}deg);${f?`animation-delay:${(.5+tfFr.indexOf(n.u)*1.1).toFixed(1)}s`:''}" onclick="tfRead(${n.u},event)"><img src="images/zettel.png"><span>${n.t.replace(" ","<br>")}</span></div>`}).join('')}</div><div class="tfh${tfAt?'':' on'}" id=tfh>${ns.length?'Tippe auf einen Zettel zum Lesen<br>':'Es hängen noch keine Zettel.<br>'}Tippe neben die Tafel zum Schließen</div></div>`+(rd?`<div class=tfr onclick="tfUnread()"><div class=tfp><img src="images/zettel.png"><div><h2>${rd.t}</h2><p style="font-size:${rd.x.length>230?'15px':'17px'}">${rd.x.replace(/\n/g,'<br>')}</p><small>Antippen zum Schließen</small></div></div></div>`:'');
+el.className='on';if(first&&!tfAt){const w=document.getElementById('tfw'),b=document.getElementById('tfb');if(w&&b){const a=w.getBoundingClientRect(),r=b.getBoundingClientRect();w.style.transition='none';w.style.transform=`translate(${r.left+r.width/2-a.left-a.width/2}px,${r.top+r.height/2-a.top-a.height/2}px) scale(${r.width/a.width})`;w.style.opacity='0';void w.offsetWidth;w.style.transition='';w.style.transform='';w.style.opacity=''}}
+if(first&&tfAt)setTimeout(()=>{const h=document.getElementById('tfh');if(h)h.classList.add('on')},3000)};
 var ag=0,tsel=null,tn=0,rk=0;
 const thiefUI=()=>`<p>Welche Karte wählst du? Oder möchtest du nicht tauschen?</p><div style="display:flex;gap:10px;justify-content:center">${v.spare.map((q,i)=>`<div onclick="tg(${i})" style="width:44%;border-radius:12px;transition:transform .15s;${tsel===i?'filter:drop-shadow(0 0 12px var(--ac));transform:scale(1.06)':tsel!==null?'opacity:.6':''}">${img(q,'100%')}<small>${R[q][0]}</small></div>`).join('')}</div>`+ib('bestaetigen-dieb',tsel!==null?'Karte tauschen':tn?'Bestätigen':'Nicht tauschen','tb()',v.must&&tsel===null)+(v.must?'<p><small>Beide Karten sind Werwölfe – du musst eine nehmen.</small></p>':''),
 sisT=()=>v.me.role==='schwester'?(v.sis?`<p>Deine Schwester:<br><b style="font-size:1.4em">${nm(v.sis)}</b></p>`:'<p>Deine Schwester ist nicht im Spiel.</p>'):v.me.role==='verdaechtiger'?'<p>Schaut die Seherin dich an, erscheinst du ihr als Werwolf.</p>':'';
