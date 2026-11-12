@@ -2,7 +2,7 @@ export default{fetch(r,e){const u=new URL(r.url),c=(u.searchParams.get('room')||
 const ROLE={thief:'dieb',amor:'amor',prot:'heiler',seer:'seherin',wolves:'werwolf',heal:'hexe',poison:'hexe',raven:'rabe'},
 NEXT={thief:'amor',amor:'lovers',lovers:'prot',prot:'seer',seer:'wolves',wolves:'heal',heal:'poison',poison:'raven',raven:'end'},
 CUE={thief:['dieb-erwacht','dieb-schlaeft'],amor:['amor-erwacht','amor-schlaeft'],lovers:['verliebte-erwachen','verliebte-schlafen'],prot:['heiler-erwacht','heiler-schlaeft'],seer:['seherin-erwacht','seherin-schlaeft'],wolves:['werwoelfe-erwachen','werwoelfe-schlafen'],heal:['hexe-erwacht','hexe-schlaeft'],raven:['rabe-erwacht','rabe-schlaeft']},
-KEYS=['phase','step','host','cfg','win','pot','victim','healed','poisoned','seen','nx','captain','lovers','nn','protect','lastProt','dead','kind','pend','cont','aw','actor','retry','sn','capNew','cands','rnd','lot','capHow','res','spare','thiefDone','thiefId','capNone','tEnd','fool','foolCap','bitId','desp','vset','bockId','curseId','dieb','hr','appId','appFrom','markId','log','tf','evDrawn','ef','rd','noCap','tieN','tieSure','victim2','wRound','protect2','lastProt2','healId','seen2','alt','mkc'];
+KEYS=['phase','step','host','cfg','win','pot','victim','healed','poisoned','seen','nx','captain','lovers','nn','protect','lastProt','dead','kind','pend','cont','aw','actor','retry','sn','capNew','cands','rnd','lot','capHow','res','spare','thiefDone','thiefId','capNone','tEnd','fool','foolCap','bitId','desp','vset','bockId','curseId','dieb','hr','appId','appFrom','markId','log','tf','evDrawn','ef','rd','noCap','tieN','tieSure','victim2','wRound','protect2','lastProt2','healId','seen2','alt','mkc','tNext','tImm'];
 const RL={werwolf:1,seherin:1,hexe:1,jaeger:1,amor:1,heiler:1,maedchen:1,dieb:1,wolfshund:1,dorfdepp:1,alter:1,suendenbock:1,verfluchter:1,schwestern:1,lehrling:1,verdaechtiger:1,rabe:1};
 function suggest(n){return{werwolf:n<6?1:n<9?2:n<13?3:4,seherin:n>=5?1:0,hexe:n>=6?1:0,jaeger:n>=6?1:0,amor:n>=7?1:0,heiler:0,maedchen:n>=11?1:0,dieb:n>=12?1:0}}
 const EV=[
@@ -91,6 +91,7 @@ else if(t==='seen'&&ph==='roles'){if(!(p.id===this.dieb&&!this.thiefDone)){this.
 else if(t==='thief'&&ph==='roles'&&p.id===this.dieb&&!this.thiefDone)this.thiefPick(p,m.i)
 else if(t==='dog'&&ph==='roles'&&p.role==='wolfshund'&&(m.r==='werwolf'||m.r==='dorfbewohner')){p.role=m.r;this.chk()}
 else if(t==='more'&&h&&s==='talk'&&this.tEnd)this.tEnd=Math.max(this.tEnd,Date.now())+120000;
+/*TEST-START*/else if(t==='tst'&&h){if('n' in m)this.tNext=EV.some(x=>x.id===m.n)?m.n:null;if('i' in m)this.tImm=!!m.i}/*TEST-END*/
 else if((t==='go'&&h&&((ph==='roles'&&this.ready())||s==='out'||s==='cap'||(s==='talk'&&this.ef&&this.ef.id==='gewitter')))||(t==='gof'&&h&&ph==='roles')){if(ph==='roles'){this.thiefAuto();this.dogAuto()}if(ph==='roles'&&this.cfg.cap&&this.cfg.capWhen==='start'){this.phase='day';this.step='wahl';this.aw='night';this.dead=[];this.sn=false;this.capNew=null;this.initW()}else this.night()}
 else if(((t==='again'&&ph==='over')||(t==='reset'&&ph!=='lobby'))&&h){this.phase='lobby';this.step=null;this.win=null;this.locked=false;this.votes=new Map();for(const x of this.P.values()){x.alive=true;x.role=null}this.reset()}
 else if(ph==='night'&&p.alive)this.nightMsg(p,m);
@@ -135,7 +136,7 @@ next(s){if(this.step===s)this.done(s)}
 say(id,cb,pz){const n=++this.cueN;this.cue={id,n};this.cb=cb||null;this.pz=pz??Math.round(this.cfg.pause*1000);clearTimeout(this.ct);if(cb)this.ct=setTimeout(()=>this.cd(n),9000);this.push()}
 cd(n){if(n!==this.cueN||!this.cb)return;clearTimeout(this.ct);const f=this.cb;this.cb=null;setTimeout(()=>{f();this.push()},this.pz)}
 night(){this.phase='night';this.nn++;this.nightReset();this.nightFx();this.dead=[];this.step='wait';this.nx='thief';this.say('nacht-beginnt',()=>this.go('thief'))}
-die(id,how){const p=this.P.get(id);if(!p||!p.alive)return;p.alive=false;this.dead.push({id,how});this.L({e:'d',id,how,r:p.role,d:this.phase==='night'?0:1});
+die(id,how){const p=this.P.get(id);if(!p||!p.alive)return;if(this.tImm)return;/*TEST*/p.alive=false;this.dead.push({id,how});this.L({e:'d',id,how,r:p.role,d:this.phase==='night'?0:1});
 if(this.lovers&&this.lovers.includes(id))this.die(this.lovers.find(x=>x!==id),'liebe');
 if(p.role==='seherin'){const l=[...this.P.values()].find(x=>x.alive&&x.role==='lehrling');if(l){l.orig='lehrling';l.role='seherin';this.appId=l.id;this.appFrom=id;this.L({e:'app',id:l.id,d:this.phase==='night'?0:1})}}
 if(how==='bock')this.pend.push({t:'bock',id});
@@ -171,12 +172,13 @@ return this.finalTie(pool,need,sure)}
 vvs(){return[this.victim,this.victim2].filter(i=>{const q=i&&this.P.get(i);return i&&this.protect!==i&&this.protect2!==i&&!(q&&q.role==='alter'&&!(q.bites>0))})}
 vv(){return this.vvs()[0]||null}
 L(o){(this.log||(this.log=[])).push({n:this.nn,...o})}
-evMorning(){const c=this.cfg;this.ef=null;this.noCap=null;if(!c.ev||c.ev==='aus'){this.tf=null;return}
+evMorning(){const c=this.cfg;this.ef=null;this.noCap=null;if((!c.ev||c.ev==='aus')&&!this.tNext/*TEST*/){this.tf=null;return}
 const tf=this.tf||(this.tf={seq:0,u:0,notes:[]});tf.notes=tf.notes.filter(n=>n.k==='perm');tf.fresh=[];const add=[],mk=this.markId&&this.P.get(this.markId);
 if(mk&&mk.alive)add.push({id:'brief',k:'once',t:'Anonymer Brief',x:`Ein anonymer Brief ist im Dorf eingegangen: ${mk.name} ist verdächtig! (Abstimmung +1)`});
 const d=this.nn,fr={selten:3,mittel:2,taeglich:1}[c.ev];
-if(d>=2&&(d-2)%fr===0){const used=new Set(this.evDrawn||[]),perm=tf.notes.map(n=>n.id),KR=['krone','richter'],
-ok=EV.filter(x=>(c.evOn||[]).includes(x.id)&&!used.has(x.id)&&!(x.g==='dauer'&&(perm.length>=2||(KR.includes(x.id)&&perm.some(i=>KR.includes(i))))));
+const fc=this.tNext&&EV.find(x=>x.id===this.tNext);this.tNext=null;/*TEST*/
+if(fc||(d>=2&&fr&&(d-2)%fr===0)){const used=new Set(this.evDrawn||[]),perm=tf.notes.map(n=>n.id),KR=['krone','richter'],
+ok=fc?[fc]:EV.filter(x=>(c.evOn||[]).includes(x.id)&&!used.has(x.id)&&!(x.g==='dauer'&&(perm.length>=2||(KR.includes(x.id)&&perm.some(i=>KR.includes(i))))));
 if(ok.length){const x=ok[Math.floor(Math.random()*ok.length)];this.evDrawn=[...used,x.id];const n=this.evMake(x);this.ef={id:x.id,...(n.ef||{})};delete n.ef;add.push(n);if(x.id==='wunder')this.revive();this.L({e:'ev',card:x.id,t:x.t,x:n.x.replace('{z}',n.bell?n.bell.n:''),d:1})}}
 for(const n of add){n.u=++tf.u;n.d=this.nn;const used=new Set(tf.notes.map(z=>z.z)),fr=[0,1,2,3,4,5].filter(i=>!used.has(i)),zi=fr.length?fr[Math.floor(Math.random()*fr.length)]:Math.floor(Math.random()*6),R=()=>Math.random()*2-1;n.z=zi;n.s=[+(32+(zi%3)*18+R()*2.5-22).toFixed(1),+(26+Math.floor(zi/3)*23+R()*2.5-20).toFixed(1),+(R()*6).toFixed(1)];tf.notes.push(n);tf.fresh.push(n.u)}if(add.length)tf.seq++}
 evMake(x){const A=this.A,pk=a=>a[Math.floor(Math.random()*a.length)],nm=p=>p?p.name:'jemand';let t=x.x,priv=null,bell=null;
@@ -216,7 +218,7 @@ dogAuto(){for(const x of this.P.values())if(x.role==='wolfshund')x.role=Math.ran
 ready(){return this.seenR.size>=this.P.size&&this.readyAt>0&&Date.now()>=this.readyAt}
 startT(){this.tEnd=this.cfg.timer>0&&!(this.ef&&this.ef.id==='eilverfahren')?Date.now()+this.cfg.timer*1000:0}
 push(){this.save();for(const p of this.P.values()){try{p.ws?.send(JSON.stringify(this.view(p)))}catch{}}}
-view(p){const L=[...this.P.values()],s=this.step,ph=this.phase,v={phase:ph,step:s,host:this.host,cfg:this.cfg,win:this.win,dead:this.dead,kind:this.kind,captain:this.captain,actor:this.actor,locked:this.locked,res:this.res,capNone:this.capNone,vset:this.vset,bockId:this.bockId,desp:this.desp,bit:this.bitId===p.id,cur:this.curseId===p.id,letter:this.phase==='day'&&this.markId&&this.P.get(this.markId)?.alive?this.markId:null,app:this.appId===p.id&&this.dead.some(x=>x.id===this.appFrom),appS:this.appId===p.id,fool:this.fool,foolCap:this.foolCap,tEnd:this.tEnd,now:Date.now(),retry:this.retry,capHow:this.capHow,lot:this.lot,cands:this.cands,rnd:this.rnd,capNew:this.capNew,news:this.sn,pm:this.pend.some(q=>q.id===p.id),ef:this.ef?{id:this.ef.id,a:this.ef.a}:null,noCap:this.noCap,vr:this.rd?this.rd.r:1,vm:this.rd?this.rd.m:null,tieN:this.tieN||1,drawn:ph==='lobby'?undefined:(this.evDrawn||[]),alt:(this.alt||[]).filter(i=>this.P.get(i)?.alive),away:this.away(),still:ph==='night'&&this.still(),
+view(p){const L=[...this.P.values()],s=this.step,ph=this.phase,v={phase:ph,step:s,host:this.host,cfg:this.cfg,win:this.win,dead:this.dead,kind:this.kind,captain:this.captain,actor:this.actor,locked:this.locked,res:this.res,capNone:this.capNone,vset:this.vset,bockId:this.bockId,desp:this.desp,bit:this.bitId===p.id,cur:this.curseId===p.id,letter:this.phase==='day'&&this.markId&&this.P.get(this.markId)?.alive?this.markId:null,app:this.appId===p.id&&this.dead.some(x=>x.id===this.appFrom),appS:this.appId===p.id,fool:this.fool,foolCap:this.foolCap,tEnd:this.tEnd,now:Date.now(),retry:this.retry,capHow:this.capHow,lot:this.lot,cands:this.cands,rnd:this.rnd,capNew:this.capNew,news:this.sn,pm:this.pend.some(q=>q.id===p.id),ef:this.ef?{id:this.ef.id,a:this.ef.a}:null,noCap:this.noCap,vr:this.rd?this.rd.r:1,vm:this.rd?this.rd.m:null,tieN:this.tieN||1,tn:this.tNext||null,ti:!!this.tImm,drawn:ph==='lobby'?undefined:(this.evDrawn||[]),alt:(this.alt||[]).filter(i=>this.P.get(i)?.alive),away:this.away(),still:ph==='night'&&this.still(),
 me:{id:p.id,name:p.name,role:p.role,alive:p.alive,fool:!!p.fool},
 players:L.map(x=>({id:x.id,name:x.name,alive:x.alive,on:!!x.ws,fool:!!x.fool,orig:ph==='over'?(x.role==='schwester'&&this.rv(x)!=='schwester'?'schwester':x.orig):undefined,role:((!x.alive&&this.cfg.reveal&&!this.pn('graeber'))||ph==='over'||x.id===p.id||x.fool)?this.rv(x):undefined}))};
 if(this.lovers&&(ph==='over'||this.lovers.includes(p.id)))v.lovers=this.lovers;
