@@ -91,6 +91,7 @@ else if(t==='seen'&&ph==='roles'){if(!(p.id===this.dieb&&!this.thiefDone)){this.
 else if(t==='thief'&&ph==='roles'&&p.id===this.dieb&&!this.thiefDone)this.thiefPick(p,m.i)
 else if(t==='dog'&&ph==='roles'&&p.role==='wolfshund'&&(m.r==='werwolf'||m.r==='dorfbewohner')){p.role=m.r;this.chk()}
 else if(t==='more'&&h&&s==='talk'&&this.tEnd)this.tEnd=Math.max(this.tEnd,Date.now())+120000;
+else if(t==='bell'&&h){const n=this.tf&&this.tf.notes.find(z=>z.u===m.u);if(n&&n.bell&&!n.bell.t)n.bell.t=Date.now()+1200}
 /*TEST-START*/else if(t==='tst'&&h){if('n' in m)this.tNext=EV.some(x=>x.id===m.n)?m.n:null;if('i' in m)this.tImm=!!m.i}/*TEST-END*/
 else if((t==='go'&&h&&((ph==='roles'&&this.ready())||s==='out'||s==='cap'||(s==='talk'&&this.ef&&this.ef.id==='gewitter')))||(t==='gof'&&h&&ph==='roles')){if(ph==='roles'){this.thiefAuto();this.dogAuto()}if(ph==='roles'&&this.cfg.cap&&this.cfg.capWhen==='start'){this.phase='day';this.step='wahl';this.aw='night';this.dead=[];this.sn=false;this.capNew=null;this.initW()}else this.night()}
 else if(((t==='again'&&ph==='over')||(t==='reset'&&ph!=='lobby'))&&h){this.phase='lobby';this.step=null;this.win=null;this.locked=false;this.votes=new Map();for(const x of this.P.values()){x.alive=true;x.role=null}this.reset()}
@@ -185,7 +186,7 @@ evMake(x){const A=this.A,pk=a=>a[Math.floor(Math.random()*a.length)],nm=p=>p?p.n
 let ef=null;if(['verbannt','gnade','rufmord','beichtstuhl','stumme','schlaftrunk'].includes(x.id)){const q=pk(A);t=t.replace('{a}',nm(q));ef={a:q&&q.id}}
 else if(x.id==='geruecht'){const wv=A.filter(y=>y.role==='werwolf'),f=pk(wv.length?wv:A),s=[f,pk(A.filter(y=>y!==f))].sort(()=>Math.random()-.5);t=t.replace('{a}',nm(s[0])).replace('{b}',nm(s[1]))}
 else if(x.id==='wanderer'){const r=pk(A),o=A.filter(y=>y!==r&&y.role!=='werwolf');if(r&&o.length)priv={id:r.id,x:`Der Wanderer flüstert dir zu: ${pk(o).name} ist kein Werwolf.`}}
-else if(x.id==='glocken')bell={n:this.W.length,t:Date.now()+6000};
+else if(x.id==='glocken')bell={n:this.W.length,t:null};
 else if(x.id==='wunder'){const w=(this.dead||[]).filter(q=>q.how==='wolf').map(q=>this.P.get(q.id)?.name).filter(Boolean);t=t.replace('{a}',w.length?': '+w.join(' und '):'')}
 return{id:x.id,k:x.g==='dauer'?'perm':'once',t:x.t,x:t,priv,bell,ef}}
 rv(x){return x.role==='schwester'&&![...this.P.values()].some(y=>y!==x&&y.role==='schwester')?'dorfbewohner':x.role}
