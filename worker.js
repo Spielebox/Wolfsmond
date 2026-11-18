@@ -66,17 +66,20 @@ get Wa(){return this.W.filter(x=>!this.idle(x.id))}
 get W(){return this.A.filter(x=>x.role==='werwolf')}
 same(){const w=this.Wa;return w.length>0&&w.every(x=>this.wp.has(x.id))&&new Set(w.map(x=>this.wp.get(x.id))).size===1}
 async fetch(r){const u=new URL(r.url),id=u.searchParams.get('id'),[c,ws]=Object.values(new WebSocketPair());ws.accept();
+const hp0=this.P.get(this.host);if(this.phase==='lobby'&&hp0&&!hp0.ws){hp0.off??=Date.now();if(Date.now()-hp0.off>6e5&&id!==this.host){this.P.clear();this.host=null}}
 let p=this.P.get(id);
 if(!p){const no=e=>{ws.send(JSON.stringify({err:e}));ws.close();return new Response(null,{status:101,webSocket:c})};
 if(this.phase!=='lobby'||!id)return no('Das Spiel läuft bereits.');
 if(this.locked)return no('Die Lobby ist gesperrt.');
 const kw=this.env&&this.env.ACCESS_WORD;if(!this.host&&kw&&u.searchParams.get('k')!==kw)return no('Zugangswort fehlt oder ist falsch.');
 p={id,name:(u.searchParams.get('name')||'Spieler').replace(/[<>&"'`]/g,'').slice(0,14)||'Spieler',alive:true,role:null};this.P.set(id,p);this.host??=id}
-p.ws=ws;
+p.ws=ws;p.off=null;
 ws.addEventListener('message',e=>{try{this.msg(p,JSON.parse(e.data))}catch{}});
-ws.addEventListener('close',()=>{if(p.ws!==ws)return;p.ws=null;if(this.phase==='lobby'){this.P.delete(id);if(this.host===id)this.host=this.P.keys().next().value??null}this.push()});
+ws.addEventListener('close',()=>{if(p.ws!==ws)return;p.ws=null;p.off=Date.now();if(this.phase==='lobby'&&id!==this.host)this.P.delete(id);this.push()});
 this.push();return new Response(null,{status:101,webSocket:c})}
 msg(p,m){const t=m.t,h=p.id===this.host,ph=this.phase,s=this.step;
+if(t==='bye'&&ph==='lobby'){this.P.delete(p.id);if(this.host===p.id)this.host=this.P.keys().next().value??null;try{p.ws?.close()}catch{}p.ws=null;this.push();return}
+if(t==='claim'&&ph!=='lobby'&&!h){const hp=this.P.get(this.host);if(!hp||(!hp.ws&&Date.now()-(hp.off??=Date.now())>=60000)){this.host=p.id;this.push()}return}
 if(t==='cd'&&h)this.cd(m.n);
 else if(t==='cfg'&&h&&ph==='lobby'){const lim={u:0,cap:0,capWhen:0,selfW:0,capTie:0,rabeN:0,reveal:0,seerTrue:0,auto:0,timer:[0,1800],pause:[.5,8],rolePause:[0,15],n:[0,20]};if(m.k==='ev'){if(['aus','selten','mittel','taeglich'].includes(m.v))this.cfg.ev=m.v}else if(m.k==='auto'){if(!m.v&&this.cfg.auto)this.cfg.r=suggest(this.cfg.n||this.P.size);this.cfg.auto=!!m.v}else if(m.k in lim){let x=m.v;if(Array.isArray(lim[m.k]))x=Math.max(lim[m.k][0],Math.min(lim[m.k][1],+x||0));this.cfg[m.k]=x}}
 else if(t==='evon'&&h&&ph==='lobby'&&Array.isArray(m.ids)){const s=new Set(this.cfg.evOn||[]);for(const i of m.ids)if(EVI[i]){if(m.v)s.add(i);else s.delete(i)}this.cfg.evOn=EV.map(x=>x.id).filter(i=>s.has(i))}
@@ -229,7 +232,7 @@ dogAuto(){for(const x of this.P.values())if(x.role==='wolfshund')x.role=Math.ran
 ready(){return this.seenR.size>=this.P.size&&this.readyAt>0&&Date.now()>=this.readyAt}
 startT(){this.tEnd=this.cfg.timer>0&&!(this.ef&&this.ef.id==='eilverfahren')?Date.now()+this.cfg.timer*1000:0}
 push(){this.save();for(const p of this.P.values()){try{p.ws?.send(JSON.stringify(this.view(p)))}catch{}}}
-view(p){const L=[...this.P.values()],s=this.step,ph=this.phase,v={phase:ph,step:s,host:this.host,cfg:this.cfg,win:this.win,dead:this.dead,kind:this.kind,captain:this.captain,actor:this.actor,locked:this.locked,res:this.res,capNone:this.capNone,vset:this.vset,bockId:this.bockId,desp:this.desp,bit:this.bitId===p.id,cur:this.curseId===p.id,letter:this.phase==='day'&&this.markId&&this.P.get(this.markId)?.alive?this.markId:null,app:this.appId===p.id&&this.dead.some(x=>x.id===this.appFrom),appS:this.appId===p.id,fool:this.fool,foolCap:this.foolCap,tEnd:this.tEnd,now:Date.now(),retry:this.retry,capHow:this.capHow,lot:this.lot,cands:this.cands,rnd:this.rnd,capNew:this.capNew,news:this.sn,pm:this.pend.some(q=>q.id===p.id),ef:this.ef?{id:this.ef.id,a:this.ef.a}:null,noCap:this.noCap,vr:this.rd?this.rd.r:1,vm:this.rd?this.rd.m:null,tieN:this.tieN||1,sk:ph==='day'&&this.sk?this.sk:undefined,tn:this.tNext||null,ti:!!this.tImm,drawn:ph==='lobby'?undefined:(this.evDrawn||[]),alt:(this.alt||[]).filter(i=>this.P.get(i)?.alive),away:this.away(),still:ph==='night'&&this.still(),
+view(p){const L=[...this.P.values()],s=this.step,ph=this.phase,v={phase:ph,step:s,host:this.host,cfg:this.cfg,win:this.win,dead:this.dead,kind:this.kind,captain:this.captain,actor:this.actor,locked:this.locked,res:this.res,capNone:this.capNone,vset:this.vset,bockId:this.bockId,desp:this.desp,bit:this.bitId===p.id,cur:this.curseId===p.id,letter:this.phase==='day'&&this.markId&&this.P.get(this.markId)?.alive?this.markId:null,app:this.appId===p.id&&this.dead.some(x=>x.id===this.appFrom),appS:this.appId===p.id,fool:this.fool,foolCap:this.foolCap,tEnd:this.tEnd,now:Date.now(),retry:this.retry,capHow:this.capHow,lot:this.lot,cands:this.cands,rnd:this.rnd,capNew:this.capNew,news:this.sn,pm:this.pend.some(q=>q.id===p.id),ef:this.ef?{id:this.ef.id,a:this.ef.a}:null,noCap:this.noCap,vr:this.rd?this.rd.r:1,vm:this.rd?this.rd.m:null,tieN:this.tieN||1,sk:ph==='day'&&this.sk?this.sk:undefined,hgt:(()=>{const hp=this.P.get(this.host);return ph!=='lobby'&&hp&&!hp.ws?(hp.off??=Date.now()):null})(),tn:this.tNext||null,ti:!!this.tImm,drawn:ph==='lobby'?undefined:(this.evDrawn||[]),alt:(this.alt||[]).filter(i=>this.P.get(i)?.alive),away:this.away(),still:ph==='night'&&this.still(),
 me:{id:p.id,name:p.name,role:p.role,alive:p.alive,fool:!!p.fool},
 players:L.map(x=>({id:x.id,name:x.name,alive:x.alive,on:!!x.ws,fool:!!x.fool,orig:ph==='over'?(x.role==='schwester'&&this.rv(x)!=='schwester'?'schwester':x.orig):undefined,role:((!x.alive&&this.cfg.reveal&&!this.pn('graeber'))||ph==='over'||x.id===p.id||x.fool)?this.rv(x):undefined}))};
 if(this.lovers&&(ph==='over'||this.lovers.includes(p.id)))v.lovers=this.lovers;
