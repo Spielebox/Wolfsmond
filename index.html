@@ -80,7 +80,7 @@ details{border:1px solid #ffffff22;border-radius:10px;margin:6px 0;padding:2px 1
 .ov{position:fixed;inset:0;background:#000d;display:flex;flex-direction:column;justify-content:center;padding:24px;z-index:9}
 .logo{display:block;width:72%;max-width:300px;margin:10px auto;border-radius:14px}
 </style></head><body><main id="a"></main><script>
-const VER='1.12.-27';
+const VER='1.12.-28';
 (()=>{const i=new Image();i.onload=()=>{try{const w=i.naturalWidth,h=i.naturalHeight,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(i,0,0);const d=x.getImageData(0,0,w,h),p=d.data;for(let k=0;k<p.length;k+=4){const r=p[k],g=p[k+1],b=p[k+2],a=p[k+3],mx=Math.max(r,g,b),mn=Math.min(r,g,b);const ok=a>0&&r>b+5&&mx>0&&(mx-mn)/mx>.18;p[k]=p[k+1]=p[k+2]=255;p[k+3]=ok?a:0}x.putImageData(d,0,0);document.documentElement.style.setProperty('--sm','url('+c.toDataURL()+')');document.documentElement.classList.add('sm')}catch(e){}};i.src='images/balken.png'})();
 const WS='wss://wolfsmond.spam-lama.workers.dev';
 const R={werwolf:['Werwolf','🐺'],dorfbewohner:['Dorfbewohner','🧑‍🌾'],seherin:['Seherin','🔮'],hexe:['Hexe','🧪'],jaeger:['Jäger','🏹'],amor:['Amor','💘'],heiler:['Heiler','💚'],maedchen:['Blinzelndes Mädchen','👀'],dieb:['Dieb','🗝️'],wolfshund:['Wolfshund','🐕'],dorfdepp:['Dorfdepp','🤪'],alter:['Der Alte','👴'],suendenbock:['Sündenbock','🐐'],verfluchter:['Verfluchter','🌘'],schwester:['Schwester','👭'],lehrling:['Lehrling der Seherin','🕯️'],verdaechtiger:['Verdächtiger','🕵️'],rabe:['Rabe','🐦'],brief:['Brief','✉️']};
@@ -160,7 +160,7 @@ const bzn=n=>{if(!n.bell||!v||!n.bell.t)return 0;const d=Date.now()-(v._o||0)-n.
 bzx=n=>n.bell?n.x.replace('{z}',bzn(n)):n.x,
 bdone={},
 bellCheck=()=>{if(!v||!v.tf||v.host!==v.me.id)return;v.tf.notes.forEach(n=>{if(!n.bell||!n.bell.t||bdone[n.u+':'+n.bell.t])return;bdone[n.u+':'+n.bell.t]=1;const now=Date.now()-(v._o||0);for(let i=0;i<n.bell.n;i++){const w=n.bell.t+i*3300-now;if(w>-1500)setTimeout(function rg(k){if(pl&&k<20)return setTimeout(()=>rg(k+1),300);try{au.onended=au.onerror=null;au.muted=false;au.src='audio/glocke.m4a';au.play().catch(()=>{})}catch(e){}},Math.max(0,w),0)}})};
-let hgS=0;setInterval(()=>{const o=hgOk();if(o!==!!hgS){hgS=o?1:0;render()}},3000);
+let hgS=0;setInterval(()=>{const o=!!hgOk();if(o!==!!hgS){hgS=o?1:0;render()}},3000);
 setInterval(()=>{const p=document.getElementById('bzp'),T=v&&v.tf,r=T&&tfRd&&T.notes.find(z=>z.u===tfRd);if(p&&r&&r.bell){const t=bzx(r).replace(/\n/g,'<br>');if(p.innerHTML!==t)p.innerHTML=t}},400);
 const thiefUI=()=>`<p>Welche Karte wählst du? Oder möchtest du nicht tauschen?</p><div style="display:flex;gap:10px;justify-content:center">${v.spare.map((q,i)=>`<div onclick="tg(${i})" style="width:44%;border-radius:12px;transition:transform .15s;${tsel===i?'filter:drop-shadow(0 0 12px var(--ac));transform:scale(1.06)':tsel!==null?'opacity:.6':''}">${img(q,'100%')}<small>${R[q][0]}</small></div>`).join('')}</div>`+ib('bestaetigen-dieb',tsel!==null?'Karte tauschen':tn?'Bestätigen':'Nicht tauschen','tb()',v.must&&tsel===null)+(v.must?'<p><small>Beide Karten sind Werwölfe – du musst eine nehmen.</small></p>':''),
 sisT=()=>v.me.role==='schwester'?(v.sis?`<p>Deine Schwester:<br><b style="font-size:1.4em">${nm(v.sis)}</b></p>`:'<p>Deine Schwester ist nicht im Spiel.</p>'):v.me.role==='verdaechtiger'?'<p>Schaut die Seherin dich an, erscheinst du ihr als Werwolf.</p>':'';
